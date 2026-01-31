@@ -123,6 +123,7 @@
 
 body {
   @apply overscroll-none bg-transparent;
+  font-family: "Poppins", var(--font-poppins), sans-serif;
 }
 
 :root {

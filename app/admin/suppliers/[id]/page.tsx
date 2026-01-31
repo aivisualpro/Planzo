@@ -80,7 +80,7 @@ export default function SupplierDetailPage({ params }: { params: Promise<{ id: s
     if (supplier) {
       setLeftContent(
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-black tracking-tight text-foreground uppercase">{supplier.name}</h1>
+          <h1 className="text-xl font-black tracking-tight uppercase bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">{supplier.name}</h1>
           <div className="flex gap-2">
             <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-black border border-primary/20">{supplier.vbId}</span>
             <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full font-black border uppercase tracking-tighter">{supplier.location?.length || 0} Locations</span>

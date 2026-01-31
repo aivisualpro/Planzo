@@ -2,11 +2,16 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { HeaderActionsProvider } from "@/components/providers/header-actions-provider";
+import { cookies } from "next/headers";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
   return (
     <HeaderActionsProvider>
       <SidebarProvider
+        defaultOpen={defaultOpen}
         className="h-screen overflow-hidden"
         style={
           {

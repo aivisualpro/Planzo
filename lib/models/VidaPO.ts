@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IVidaPOShipping {
+  _id?: string;
   spoNo?: string;
   svbid?: string;
   supplier?: string;
@@ -49,9 +50,16 @@ export interface IVidaPOShipping {
   IsDrayageAssigned?: boolean;
   truckerNotifiedDate?: Date;
   isTruckerReceivedDeliveryOrder?: boolean;
+  itemNo?: string;
+  description?: string;
+  lotSerial?: string;
+  qty?: number;
+  type?: string;
+  inventoryDate?: Date;
 }
 
 export interface IVidaPOCustomerPO {
+  _id?: string;
   poNo?: string;
   customer?: string;
   customerLocation?: string;
@@ -124,6 +132,12 @@ const VidaPOShippingSchema: Schema = new Schema({
   IsDrayageAssigned: { type: Boolean },
   truckerNotifiedDate: { type: Date },
   isTruckerReceivedDeliveryOrder: { type: Boolean },
+  itemNo: { type: String },
+  description: { type: String },
+  lotSerial: { type: String },
+  qty: { type: Number },
+  type: { type: String },
+  inventoryDate: { type: Date },
 });
 
 const VidaPOCustomerPOSchema: Schema = new Schema({

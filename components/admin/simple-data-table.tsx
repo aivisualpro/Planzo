@@ -140,7 +140,11 @@ export function SimpleDataTable<TData, TValue>({
     );
 
     if (title) {
-      setLeftContent(<h1 className="text-xl font-bold">{title}</h1>);
+      setLeftContent(
+        <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          {title}
+        </h1>
+      );
     }
     return () => {
       setActions(null);
@@ -163,14 +167,14 @@ export function SimpleDataTable<TData, TValue>({
 
   return (
     <div className="w-full h-full flex flex-col gap-2 overflow-hidden">
-      <div className="rounded-md border flex-1 overflow-auto bg-background min-h-0 relative">
-        <Table className="relative w-full border-separate border-spacing-0">
+      <div className="rounded-md border flex-1 overflow-auto bg-background min-h-0 relative scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-800">
+        <table className="relative w-full border-separate border-spacing-0">
           <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="sticky top-0 bg-background z-20 border-b">
+                    <TableHead key={header.id} className="sticky top-0 bg-background z-20 border-b backdrop-blur-sm text-[14px] font-normal">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -202,7 +206,7 @@ export function SimpleDataTable<TData, TValue>({
                   className={onRowClick ? "cursor-pointer" : ""}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-0.5 h-8">
+                    <TableCell key={cell.id} className="py-0.5 h-8 text-[14px] font-normal">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -222,7 +226,7 @@ export function SimpleDataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
-        </Table>
+        </table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-2">
         <div className="flex-1 text-sm text-muted-foreground">

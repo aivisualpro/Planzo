@@ -34,12 +34,16 @@ export function SiteHeader() {
 
   const getTitle = (path: string) => {
     if (path === "/dashboard") return "Dashboard";
+    if (path.includes("andres-tracker")) return "Andres Tracker";
+    
     const segments = path.split("/").filter(Boolean);
     const lastSegment = segments[segments.length - 1];
     if (!lastSegment) return "Dashboard";
     
-    // Capitalize first letter and handle special cases if needed
-    return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
+    // Convert hyphens/underscores to spaces and capitalize
+    return lastSegment
+      .replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
   };
 
   const title = getTitle(pathname);
@@ -55,7 +59,9 @@ export function SiteHeader() {
         {headerCtx.leftContent ? (
           headerCtx.leftContent
         ) : (
-          <h1 className="text-base font-medium">{title}</h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            {title}
+          </h1>
         )}
         <div className="ml-auto flex items-center gap-2">
           {headerCtx.rightContent || headerCtx.actions}

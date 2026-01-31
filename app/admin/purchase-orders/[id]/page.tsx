@@ -394,7 +394,7 @@ export default function PurchaseOrderDetailPage({ params }: { params: Promise<{ 
       if (!editingShipping) formattedData.status = 'Ordered'; // Default status for new
       
       // Numbers
-      ['drums', 'pallets', 'gallons', 'netWeightKG', 'grossWeightKG', 'invValue', 'estTrumpDuties', 'feesAmount', 'estimatedDuties'].forEach(k => {
+      ['drums', 'pallets', 'gallons', 'netWeightKG', 'grossWeightKG', 'invValue', 'estTrumpDuties', 'feesAmount', 'estimatedDuties', 'qty'].forEach(k => {
           if (formattedData[k]) formattedData[k] = Number(formattedData[k]);
       });
 
@@ -440,7 +440,7 @@ export default function PurchaseOrderDetailPage({ params }: { params: Promise<{ 
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold leading-none uppercase">{po.vbpoNo}</h1>
+            <h1 className="text-lg font-bold leading-none uppercase bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">{po.vbpoNo}</h1>
             <span className="text-sm text-muted-foreground font-medium uppercase tracking-tight">{po.orderType}</span>
             <span className="text-sm text-gray-300">•</span>
             <span className="text-sm text-muted-foreground font-medium uppercase tracking-tight">{po.category}</span>
@@ -1244,6 +1244,35 @@ export default function PurchaseOrderDetailPage({ params }: { params: Promise<{ 
                       <Label>Genset Invoice #</Label>
                       <Input name="gensetInv" placeholder="Invoice #" defaultValue={editingShipping?.data?.gensetInv} />
                   </div>
+
+                   {/* --- Inventory Details (New) --- */}
+                   <div className="md:col-span-2 mt-2">
+                      <h4 className="text-xs font-black uppercase text-muted-foreground tracking-widest mb-3 border-b pb-1">Inventory Details</h4>
+                   </div>
+                   <div className="space-y-1">
+                       <Label>Item No</Label>
+                       <Input name="itemNo" placeholder="Item Code" defaultValue={editingShipping?.data?.itemNo} />
+                   </div>
+                   <div className="space-y-1">
+                       <Label>Lot / Serial</Label>
+                       <Input name="lotSerial" placeholder="Lot No" defaultValue={editingShipping?.data?.lotSerial} />
+                   </div>
+                   <div className="md:col-span-2 space-y-1">
+                       <Label>Description</Label>
+                       <Input name="description" placeholder="Item Description" defaultValue={editingShipping?.data?.description} />
+                   </div>
+                   <div className="space-y-1">
+                       <Label>Quantity</Label>
+                       <Input name="qty" type="number" defaultValue={editingShipping?.data?.qty} />
+                   </div>
+                   <div className="space-y-1">
+                       <Label>Type</Label>
+                       <Input name="type" placeholder="e.g. Stock, Transit" defaultValue={editingShipping?.data?.type} />
+                   </div>
+                   <div className="space-y-1">
+                       <Label>Inventory Date</Label>
+                       <Input name="inventoryDate" type="date" defaultValue={editingShipping?.data?.inventoryDate ? new Date(editingShipping.data.inventoryDate).toISOString().split('T')[0] : ''} />
+                   </div>
 
                    {/* --- Other --- */}
                   <div className="md:col-span-2 mt-2">
