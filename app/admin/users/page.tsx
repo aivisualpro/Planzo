@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
 import { SimpleDataTable } from "@/components/admin/simple-data-table";
 import { Button } from "@/components/ui/button";
@@ -56,7 +58,9 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<User | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -166,15 +170,24 @@ export default function UsersPage() {
 
   // Load signature into canvas when editing
   useEffect(() => {
-      if (isSheetOpen && formData.signature && signatureCanvasRef.current) {
-          const canvas = signatureCanvasRef.current;
+    if (isSheetOpen && formData.signature) {
+      // Small timeout to ensure canvas is mounted in DOM
+      const timer = setTimeout(() => {
+        const canvas = signatureCanvasRef.current;
+        if (canvas) {
           const ctx = canvas.getContext("2d");
-          const img = new Image();
-          img.onload = () => {
-              ctx?.drawImage(img, 0, 0);
-          };
-          img.src = formData.signature;
-      }
+          if (ctx) {
+            const img = new Image();
+            img.onload = () => {
+              ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear before drawing
+              ctx.drawImage(img, 0, 0);
+            };
+            img.src = formData.signature!; // Use non-null assertion as checked above
+          }
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
   }, [isSheetOpen, formData.signature]);
 
   const fetchUsers = async () => {
@@ -350,7 +363,7 @@ export default function UsersPage() {
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={() => toast.info("User details coming soon...")}
+          onClick={() => router.push(`/admin/users/${row.original._id}`)}
           className="h-8 w-8 p-0"
         >
           <FileText className="h-4 w-4" />

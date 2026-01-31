@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import VidaUser from "@/lib/models/VidaUser";
 
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    await connectToDatabase();
+    const item = await VidaUser.findById(id);
+    if (!item) {
+      return NextResponse.json({ error: "Item not found" }, { status: 404 });
+    }
+    return NextResponse.json(item);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
