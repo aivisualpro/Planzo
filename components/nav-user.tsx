@@ -1,5 +1,5 @@
-"use client"
-
+import * as React from "react"
+import { useState, useEffect } from "react"
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -8,6 +8,7 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react"
 
+import { useRouter } from "next/navigation"
 import {
   Avatar,
   AvatarFallback,
@@ -30,15 +31,42 @@ import {
 } from "@/components/ui/sidebar"
 
 export function NavUser({
-  user,
+  user: initialUser,
 }: {
   user: {
     name: string
     email: string
     avatar: string
+    id?: string
+    role?: string
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const [user, setUser] = useState({
+    ...initialUser,
+    id: "679e2a44ea73db1789c62981", // Fallback ID
+    role: "Administrator"         // Fallback Role
+  })
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("vb_auth_token")
+    if (token) {
+      try {
+        const salt = "vida_buddies_secret_salt"
+        const decoded = JSON.parse(atob(token).replace(salt, ""))
+        setUser({
+          id: decoded.id || "679e2a44ea73db1789c62981",
+          name: decoded.name || "Admin User",
+          email: decoded.email || "admin@example.com",
+          role: decoded.role || "Administrator",
+          avatar: decoded.avatar || "/logo.png"
+        })
+      } catch (e) {
+        console.error("Failed to parse auth token")
+      }
+    }
+  }, [])
 
   return (
     <SidebarMenu>
@@ -48,16 +76,14 @@ export function NavUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              tooltip={user.name}
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">VB</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
-                </span>
+                <span className="truncate font-black uppercase tracking-tight">{user.name}</span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -72,11 +98,16 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">VB</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="text-muted-foreground truncate text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate font-black uppercase text-[12px] tracking-tight">{user.name}</span>
+                    <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase rounded border border-blue-500/20 tracking-tighter">
+                       {user.role}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground truncate text-[10px] font-medium leading-none mt-1">
                     {user.email}
                   </span>
                 </div>
@@ -84,21 +115,13 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`/admin/users/${user.id}`)}>
                 <IconUserCircle />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
+                Profile
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/login")}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

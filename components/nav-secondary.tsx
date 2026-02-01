@@ -29,7 +29,7 @@ export function NavSecondary({
             const isActive = item.url !== "#" && pathname.startsWith(item.url);
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={isActive}>
+                <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
                   <a href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>

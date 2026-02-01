@@ -46,7 +46,11 @@ export function NavDocuments({
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild isActive={pathname.startsWith(item.url)}>
+            <SidebarMenuButton 
+              asChild 
+              isActive={pathname.startsWith(item.url)}
+              tooltip={item.name}
+            >
               <a href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>

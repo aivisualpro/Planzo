@@ -125,8 +125,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-0 hover:bg-transparent active:bg-transparent"
               size="lg"
+              tooltip="Treetop Dashboard"
             >
-              <a href="#" className="flex items-center justify-center p-2">
+              <a href="/admin/customers" className="flex items-center justify-center p-2">
                 <Image
                   src="/sidebar-logo.png"
                   alt="Company Logo"

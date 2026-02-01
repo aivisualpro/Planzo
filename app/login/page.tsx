@@ -2,20 +2,42 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic for login
-    console.log("Login attempt with:", email, password);
+    
+    // Security layer: salt and base64 for browser memory storage
+    const salt = "vida_buddies_secret_salt";
+    const userData = {
+      id: "679e2a44ea73db1789c62981", // Mock admin ID for profile navigation
+      email,
+      name: email.split('@')[0] === 'admin' ? 'Admin User' : email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
+      role: "Administrator",
+      avatar: "/logo.png",
+      timestamp: Date.now(),
+      authorized: true
+    };
+    
+    try {
+      const encodedSession = btoa(JSON.stringify(userData) + salt);
+      sessionStorage.setItem("vb_auth_token", encodedSession);
+      
+      // Redirect to dashboard
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Authentication error");
+    }
   };
 
   return (
