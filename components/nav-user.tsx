@@ -50,23 +50,34 @@ export function NavUser({
   })
 
   useEffect(() => {
-    const token = sessionStorage.getItem("vb_auth_token")
-    if (token) {
+    const fetchSession = async () => {
       try {
-        const salt = "vida_buddies_secret_salt"
-        const decoded = JSON.parse(atob(token).replace(salt, ""))
-        setUser({
-          id: decoded.id || "679e2a44ea73db1789c62981",
-          name: decoded.name || "Admin User",
-          email: decoded.email || "admin@example.com",
-          role: decoded.role || "Administrator",
-          avatar: decoded.avatar || "/logo.png"
-        })
+        const res = await fetch("/api/auth/session");
+        if (res.ok) {
+          const { user: sessionUser } = await res.json();
+          setUser({
+            id: sessionUser.id,
+            name: sessionUser.name,
+            email: sessionUser.email,
+            role: sessionUser.role,
+            avatar: sessionUser.avatar
+          });
+        }
       } catch (e) {
-        console.error("Failed to parse auth token")
+        console.error("Failed to fetch session");
       }
+    };
+    fetchSession();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+    } catch (e) {
+      console.error("Logout failed");
     }
-  }, [])
+  };
 
   return (
     <SidebarMenu>
@@ -116,7 +127,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push("/login")}>
+            <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

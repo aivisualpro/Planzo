@@ -21,34 +21,21 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      // Logic for dynamic login: Fetch users and find the matching one
-      const response = await fetch("/api/admin/users");
-      const users = await response.json();
-      
-      const foundUser = users.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (!foundUser) {
-        toast.error("Invalid credentials or user not found");
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || "Invalid credentials");
         setIsLoading(false);
         return;
       }
-
-      // Security layer: salt and base64 for browser memory storage
-      const salt = "vida_buddies_secret_salt";
-      const userData = {
-        id: foundUser._id,
-        email: foundUser.email,
-        name: foundUser.name,
-        role: foundUser.AppRole || "Manager",
-        avatar: foundUser.profilePicture || "/logo.png",
-        timestamp: Date.now(),
-        authorized: true
-      };
       
-      const encodedSession = btoa(JSON.stringify(userData) + salt);
-      sessionStorage.setItem("vb_auth_token", encodedSession);
-      
-      toast.success(`Welcome back, ${foundUser.name}`);
+      toast.success(`Welcome back, ${result.user.name}`);
       router.push("/dashboard");
     } catch (err) {
       console.error("Authentication error:", err);
