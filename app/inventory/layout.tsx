@@ -12,12 +12,19 @@ export default async function InventoryLayout({ children }: { children: React.Re
   const session = await getSession();
   
   // Extra security: Verify status in database on every page load
-  if (session) {
-    await connectToDatabase();
-    const user = await VidaUser.findById(session.id);
-    if (!user || !user.isActive) {
-      await logout();
-      redirect("/login");
+  // Extra security: Verify status in database on every page load
+  if (session && session.id) {
+     try {
+      await connectToDatabase();
+      if (session.id.match(/^[0-9a-fA-F]{24}$/)) {
+        const user = await VidaUser.findById(session.id).select('isActive');
+        if (!user || !user.isActive) {
+          await logout();
+          redirect("/login");
+        }
+      }
+    } catch (error) {
+       console.error("Layout Auth Check Error:", error);
     }
   }
 
