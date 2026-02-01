@@ -405,13 +405,15 @@ export default function ReleaseRequestsPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="flex items-end justify-end gap-2 pb-0.5">
+                <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">{editingItem ? "Save Changes" : "Submit"}</Button>
+              </div>
             </div>
-            <DialogFooter className="gap-2 sm:space-x-0">
-              <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">{editingItem ? "Save Changes" : "Submit Request"}</Button>
-            </DialogFooter>
+            {/* Footer removed to inline buttons */}
           </form>
         </DialogContent>
       </Dialog>
