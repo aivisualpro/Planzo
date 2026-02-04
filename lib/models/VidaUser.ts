@@ -6,7 +6,7 @@ export interface IVidaUser extends Document {
   password?: string;
   phone?: string;
   address?: string;
-  AppRole: 'Super Admin' | 'Manager';
+  AppRole: string;
   designation?: string;
   bioDescription?: string;
   isOnWebsite?: boolean;
@@ -26,7 +26,6 @@ const VidaUserSchema: Schema = new Schema({
   signature: { type: String },
   AppRole: { 
     type: String, 
-    enum: ['Super Admin', 'Manager'],
     required: true,
     default: 'Manager'
   },

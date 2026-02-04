@@ -139,13 +139,17 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [reports, setReports] = React.useState(data.reports);
+  const [permissions, setPermissions] = React.useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [loadingPermissions, setLoadingPermissions] = React.useState(true);
 
   React.useEffect(() => {
-    const fetchCount = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/admin/live-shipments/count');
-        if (res.ok) {
-          const { count } = await res.json();
+        // Fetch Live Shipments Count
+        const countRes = await fetch('/api/admin/live-shipments/count');
+        if (countRes.ok) {
+          const { count } = await countRes.json();
           if (count > 0) {
             setReports(prev => prev.map(item => 
               item.name === "Live Shipments" 
@@ -154,13 +158,57 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             ));
           }
         }
+
+        // Fetch User Permissions
+        const permRes = await fetch('/api/user/permissions');
+        if (permRes.ok) {
+          const data = await permRes.json();
+          setPermissions(data.permissions || []);
+          // Check if Super Admin to bypass? 
+          // The user requirement says "Manager" can't see "Users".
+          // So we rely on the returned permissions list.
+          // If the role is "Super Admin", typically they have all permissions enabled in the DB anyway.
+          
+          if (data.role === 'Super Admin') {
+              setIsAdmin(true);
+          }
+        }
       } catch (error) {
-        console.error("Failed to fetch notification count", error);
+        console.error("Failed to fetch sidebar data", error);
+      } finally {
+        setLoadingPermissions(false);
       }
     };
     
-    fetchCount();
+    fetchData();
   }, []);
+
+  const filterItems = (items: any[]) => {
+    if (loadingPermissions) return []; // Show nothing while loading to prevent flash
+    if (isAdmin) return items; // Super Admin sees all
+
+    return items.filter(item => {
+      const itemName = item.name || item.title;
+      // Dashboard usually allowed for everyone, or check specific permission
+      if (itemName === "Dashboard") return true; 
+
+      const perm = permissions.find((p: any) => p.module === itemName);
+      // If permission entry exists, check view action.
+      if (perm) {
+        return perm.actions?.view === true;
+      }
+      
+      // Fallback: If no permission record exists for this module, what to do?
+      // Legacy behavior: Visible if not restricted.
+      return true; 
+    });
+  };
+
+  const filteredAdmin = filterItems(data.admin);
+  const filteredInventory = filterItems(data.inventory);
+  const filteredManagement = filterItems(data.management);
+  const filteredReports = filterItems(reports);
+  const filteredSecondary = filterItems(data.navSecondary);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -196,11 +244,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavDocuments items={data.admin} label="Admin" />
-        <NavDocuments items={data.inventory} label="Inventory" />
-        <NavDocuments items={data.management} label="Management" />
-        <NavDocuments items={reports} label="Reports" />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {filteredAdmin.length > 0 && <NavDocuments items={filteredAdmin} label="Admin" />}
+        {filteredInventory.length > 0 && <NavDocuments items={filteredInventory} label="Inventory" />}
+        {filteredManagement.length > 0 && <NavDocuments items={filteredManagement} label="Management" />}
+        {filteredReports.length > 0 && <NavDocuments items={filteredReports} label="Reports" />}
+        {filteredSecondary.length > 0 && <NavSecondary items={filteredSecondary} className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

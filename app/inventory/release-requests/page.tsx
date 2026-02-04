@@ -284,6 +284,9 @@ export default function ReleaseRequestsPage() {
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingItem ? "Edit Release Request" : "Add Release Request"}</DialogTitle>
+            <DialogDescription>
+                Fill in the details below to create or update a release request.
+            </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-8 py-4">

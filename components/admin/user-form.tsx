@@ -22,7 +22,6 @@ import {
   Lock, 
   Activity, 
   Hash, 
-  PenTool 
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,7 +31,7 @@ interface User {
   email: string;
   phone?: string;
   address?: string;
-  AppRole: "Super Admin" | "Manager";
+  AppRole: string;
   password?: string;
   isActive: boolean;
   serialNo?: string;
@@ -67,6 +66,23 @@ export function UserForm({ initialData, onSubmit, onCancel, isSubmitting }: User
     isOnWebsite: false,
     ...initialData,
   });
+
+  const [availableRoles, setAvailableRoles] = useState<{name: string}[]>([]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await fetch("/api/admin/roles");
+        if (res.ok) {
+          const data = await res.json();
+          setAvailableRoles(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch roles", error);
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -312,8 +328,19 @@ export function UserForm({ initialData, onSubmit, onCancel, isSubmitting }: User
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Super Admin">Super Admin</SelectItem>
-                      <SelectItem value="Manager">Manager</SelectItem>
+                      {availableRoles.length > 0 ? (
+                        availableRoles.map((role) => (
+                          <SelectItem key={role.name} value={role.name}>
+                            {role.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        // Fallback if no roles loaded yet or none exist
+                        <>
+                          <SelectItem value="Super Admin">Super Admin</SelectItem>
+                          <SelectItem value="Manager">Manager</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

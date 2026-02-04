@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Settings, Upload } from "lucide-react";
+import { Settings, Upload, Shield } from "lucide-react";
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
@@ -17,6 +17,11 @@ const sidebarNavItems = [
     icon: Settings,
   },
   {
+    title: "Roles & Permissions",
+    href: "/admin/settings/roles",
+    icon: Shield,
+  },
+  {
     title: "Imports",
     href: "/admin/settings/imports",
     icon: Upload,
@@ -27,7 +32,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col space-y-8 p-8 md:flex-row md:space-x-12 md:space-y-0">
+    <div className="flex h-full flex-col space-y-8 md:flex-row md:space-x-12 md:space-y-0">
       <aside className="lg:w-1/5">
         <nav
           className={cn(
@@ -40,9 +45,9 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
               href={item.href}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                pathname === item.href
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "hover:bg-muted hover:underline",
+                pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  ? "bg-primary/10 text-primary hover:bg-primary/20 font-medium"
+                  : "hover:bg-muted hover:text-foreground",
                 "justify-start"
               )}
             >
