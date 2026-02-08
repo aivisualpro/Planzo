@@ -3,6 +3,110 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
 import SymxEmployee from "@/lib/models/SymxEmployee";
+import SymxDeliveryExcellence from "@/lib/models/SymxDeliveryExcellence";
+import SymxPhotoOnDelivery from "@/lib/models/SymxPhotoOnDelivery";
+import SymxCustomerDeliveryFeedback from "@/lib/models/SymxCustomerDeliveryFeedback";
+
+// Helper to sanitize keys (remove whitespace, special chars if needed) - not strictly needed if we map manually
+// But manual mapping is safer for exact matches.
+const deliveryExcellenceHeaderMap: Record<string, string> = {
+  "Week": "week",
+  "Delivery Associate": "deliveryAssociate",
+  "Transporter ID": "transporterId",
+  "Overall Standing": "overallStanding",
+  "Overall Score": "overallScore",
+  "FICO Metric": "ficoMetric",
+  "FICO Tier": "ficoTier",
+  "FICO Score": "ficoScore",
+  "Speeding Event Rate (per trip)": "speedingEventRate",
+  "Speeding Event Rate Tier": "speedingEventRateTier",
+  "Speeding Event Rate Score": "speedingEventRateScore",
+  "Seatbelt-Off Rate (per trip)": "seatbeltOffRate",
+  "Seatbelt-Off Rate Tier": "seatbeltOffRateTier",
+  "Seatbelt-Off Rate Score": "seatbeltOffRateScore",
+  "Distractions Rate (per trip)": "distractionsRate",
+  "Distractions Rate Tier": "distractionsRateTier",
+  "Distractions Rate Score": "distractionsRateScore",
+  "Sign/ Signal Violations Rate (per trip)": "signSignalViolationsRate",
+  "Sign/ Signal Violations Rate Tier": "signSignalViolationsRateTier",
+  "Sign/ Signal Violations Rate Score": "signSignalViolationsRateScore",
+  "Following Distance Rate (per trip)": "followingDistanceRate",
+  "Following Distance Rate Tier": "followingDistanceRateTier",
+  "Following Distance Rate Score": "followingDistanceRateScore",
+  "CDF DPMO": "cdfDpmo",
+  "CDF DPMO Tier": "cdfDpmoTier",
+  "CDF DPMO Score": "cdfDpmoScore",
+  "CED": "ced",
+  "CED Tier": "cedTier",
+  "CED Score": "cedScore",
+  "DCR": "dcr",
+  "DCR Tier": "dcrTier",
+  "DCR Score": "dcrScore",
+  "DSB": "dsb",
+  "DSB DPMO Tier": "dsbDpmoTier",
+  "DSB DPMO Score": "dsbDpmoScore",
+  "POD": "pod",
+  "POD Tier": "podTier",
+  "POD Score": "podScore",
+  "PSB": "psb",
+  "PSB Tier": "psbTier",
+  "PSB Score": "psbScore",
+  "Packages Delivered": "packagesDelivered",
+  "FICO Metric Weight Applied": "ficoMetricWeightApplied",
+  "Speeding Event Rate Weight Applied": "speedingEventRateWeightApplied",
+  "Seatbelt-Off Rate Weight Applied": "seatbeltOffRateWeightApplied",
+  "Distractions Rate Weight Applied": "distractionsRateWeightApplied",
+  "Sign/ Signal Violations Rate Weight Applied": "signSignalViolationsRateWeightApplied",
+  "Following Distance Rate Weight Applied": "followingDistanceRateWeightApplied",
+  "CDF DPMO Weight Applied": "cdfDpmoWeightApplied",
+  "CED Weight Applied": "cedWeightApplied",
+  "DCR Weight Applied": "dcrWeightApplied",
+  "DSB DPMO Weight Applied": "dsbDpmoWeightApplied",
+  "POD Weight Applied": "podWeightApplied",
+  "PSB Weight Applied": "psbWeightApplied"
+};
+
+const safeParseFloat = (val: any) => {
+    if (!val) return undefined;
+    if (typeof val === 'number') return val;
+    const str = val.toString().trim().replace('%', '');
+    if (str === '') return undefined;
+    const num = parseFloat(str);
+    return isNaN(num) ? undefined : num;
+};
+
+// Function to normalize POD CSV headers (handling newlines)
+const normalizePodHeader = (header: string) => {
+    return header.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+const podHeaderMap: Record<string, string> = {
+    "First": "firstName",
+    "Last": "lastName",
+    "Transporter ID": "transporterId",
+    "Opportunities": "opportunities",
+    "Success": "success",
+    "Bypass": "bypass",
+    "Rejects": "rejects",
+    "Blurry Photo": "blurryPhoto",
+    "Human In The Picture": "humanInThePicture",
+    "No Package Detected": "noPackageDetected",
+    "Package In Car": "packageInCar",
+    "Package In Hand": "packageInHand",
+    "Package Not Clearly Visible": "packageNotClearlyVisible",
+    "Package Too Close": "packageTooClose",
+    "Photo Too Dark": "photoTooDark",
+    "Other": "other"
+};
+
+const cdfHeaderMap: Record<string, string> = {
+    "Delivery Associate": "deliveryAssociate",
+    "Transporter ID": "transporterId",
+    "CDF DPMO": "cdfDpmo",
+    "CDF DPMO Tier": "cdfDpmoTier",
+    "CDF DPMO Score": "cdfDpmoScore",
+    "Negative Feedback Count": "negativeFeedbackCount",
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +116,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { type, data } = body;
+    const { type, data, week } = body; // Add week destructured
 
     if (!data || !Array.isArray(data)) {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
@@ -86,12 +190,243 @@ export async function POST(req: NextRequest) {
         const result = await SymxEmployee.bulkWrite(operations);
         return NextResponse.json({ 
           success: true, 
-          count: result.upsertedCount + result.modifiedCount,
+          count: (result.upsertedCount || 0) + (result.modifiedCount || 0),
+          inserted: result.upsertedCount || 0,
+          updated: result.modifiedCount || 0,
           matched: result.matchedCount 
         });
       }
 
-      return NextResponse.json({ success: true, count: 0 });
+      return NextResponse.json({ success: true, count: 0, inserted: 0, updated: 0 });
+    }
+    
+    // ── Delivery Excellence Import ──
+    else if (type === "delivery-excellence") {
+        // 1. Gather all Transporter IDs to fetch Employees
+        const transporterIds = data
+            .map((row: any) => row["Transporter ID"])
+            .filter((id: any) => id); // Filter out empty/null
+        
+        // 2. Fetch Employees
+        const employees = await SymxEmployee.find(
+            { transporterId: { $in: transporterIds } },
+            { _id: 1, transporterId: 1 }
+        ).lean();
+        
+        const employeeMap = new Map(employees.map((emp: any) => [emp.transporterId, emp._id]));
+
+        // 3. Process Rows
+        const operations = data.map((row: any) => {
+            const transporterId = row["Transporter ID"];
+            const rowWeek = row["Week"]; // Use row week for this type
+            
+            if (!transporterId || !rowWeek) return null; // Skip invalid rows
+            
+            const processedData: any = {};
+            
+            // Map CSV headers to Schema fields
+            Object.entries(row).forEach(([header, value]) => {
+                const schemaKey = deliveryExcellenceHeaderMap[header.trim()];
+                if (schemaKey) {
+                    if (
+                        schemaKey.endsWith('Score') || 
+                        schemaKey.endsWith('Rate') || 
+                        schemaKey.endsWith('Metric') || 
+                        schemaKey.endsWith('WeightApplied') || 
+                        schemaKey === 'overallScore' ||
+                        schemaKey === 'packagesDelivered' ||
+                        schemaKey === 'cdfDpmo' ||
+                        schemaKey === 'ced' ||
+                        schemaKey === 'dsb' ||
+                        schemaKey === 'psb'
+                    ) {
+                        processedData[schemaKey] = safeParseFloat(value);
+                    } else {
+                        // Strings (Tiers, IDs, etc)
+                         if (value !== undefined && value !== null && value !== "") {
+                             processedData[schemaKey] = value.toString().trim();
+                         }
+                    }
+                }
+            });
+            
+            // Link Employee if found
+            if (employeeMap.has(transporterId)) {
+                processedData.employeeId = employeeMap.get(transporterId);
+            }
+
+            // Construct Upsert Operation
+            return {
+                updateOne: {
+                    filter: { week: processedData.week, transporterId: processedData.transporterId },
+                    update: { $set: processedData },
+                    upsert: true
+                }
+            };
+        }).filter((op): op is NonNullable<typeof op> => op !== null);
+        
+        if (operations.length > 0) {
+            const result = await SymxDeliveryExcellence.bulkWrite(operations);
+            return NextResponse.json({ 
+                success: true, 
+                count: (result.upsertedCount || 0) + (result.modifiedCount || 0),
+                inserted: result.upsertedCount || 0,
+                updated: result.modifiedCount || 0,
+                matched: result.matchedCount 
+            });
+        }
+        
+        return NextResponse.json({ success: true, count: 0, inserted: 0, updated: 0 });
+    }
+
+    // ── Photo On Delivery Import ──
+    else if (type === "import-pod") {
+        if (!week) {
+            return NextResponse.json({ error: "Week is required for POD import" }, { status: 400 });
+        }
+
+        // 1. Gather Transporter IDs
+        const transporterIds = data
+            .map((row: any) => row["Transporter ID"])
+            .filter((id: any) => id);
+
+        // 2. Fetch Employees
+        const employees = await SymxEmployee.find(
+            { transporterId: { $in: transporterIds } },
+            { _id: 1, transporterId: 1 }
+        ).lean();
+        
+        const employeeMap = new Map(employees.map((emp: any) => [emp.transporterId, emp._id]));
+
+        // 3. Process Rows
+        const operations = data.map((row: any) => {
+            const transporterId = row["Transporter ID"];
+            
+            if (!transporterId) return null;
+
+            const processedData: any = {
+                week: week, // Use the passed week
+                transporterId: transporterId
+            };
+
+            // Map Headers
+            Object.entries(row).forEach(([header, value]) => {
+                // Normalize header (newlines to spaces)
+                const normalizedHeader = normalizePodHeader(header);
+                const schemaKey = podHeaderMap[normalizedHeader];
+
+                if (schemaKey) {
+                    if (schemaKey === 'firstName' || schemaKey === 'lastName' || schemaKey === 'transporterId') {
+                        if (value !== undefined && value !== null) processedData[schemaKey] = value.toString().trim();
+                    } else {
+                        // Numeric stats
+                        processedData[schemaKey] = safeParseFloat(value) || 0;
+                    }
+                }
+            });
+
+            // Link Employee
+            if (employeeMap.has(transporterId)) {
+                processedData.employeeId = employeeMap.get(transporterId);
+            }
+
+            return {
+                updateOne: {
+                    filter: { week: processedData.week, transporterId: processedData.transporterId },
+                    update: { $set: processedData },
+                    upsert: true
+                }
+            };
+        }).filter((op): op is NonNullable<typeof op> => op !== null);
+
+        if (operations.length > 0) {
+            const result = await SymxPhotoOnDelivery.bulkWrite(operations);
+            return NextResponse.json({ 
+                success: true, 
+                count: (result.upsertedCount || 0) + (result.modifiedCount || 0),
+                inserted: result.upsertedCount || 0,
+                updated: result.modifiedCount || 0,
+                matched: result.matchedCount 
+            });
+        }
+        
+        return NextResponse.json({ success: true, count: 0, inserted: 0, updated: 0 });
+    }
+    
+    // ── Customer Delivery Feedback Import ──
+    else if (type === "customer-delivery-feedback") {
+        if (!week) {
+            return NextResponse.json({ error: "Week is required for CDF import" }, { status: 400 });
+        }
+
+        // 1. Gather Transporter IDs
+        const transporterIds = data
+            .map((row: any) => row["Transporter ID"])
+            .filter((id: any) => id);
+
+        // 2. Fetch Employees
+        const employees = await SymxEmployee.find(
+            { transporterId: { $in: transporterIds } },
+            { _id: 1, transporterId: 1 }
+        ).lean();
+        
+        const employeeMap = new Map(employees.map((emp: any) => [emp.transporterId, emp._id]));
+
+        // 3. Process Rows
+        const operations = data.map((row: any) => {
+            const transporterId = row["Transporter ID"];
+            
+            if (!transporterId) return null;
+
+            const processedData: any = {
+                week: week, // Use the passed week
+                transporterId: transporterId
+            };
+
+            // Map Headers
+            Object.entries(row).forEach(([header, value]) => {
+                // Remove extra spaces if any
+                const normalizedHeader = header.trim();
+                const schemaKey = cdfHeaderMap[normalizedHeader];
+
+                if (schemaKey) {
+                    if (schemaKey === 'deliveryAssociate' || schemaKey === 'transporterId' || schemaKey === 'cdfDpmoTier') {
+                        if (value !== undefined && value !== null && value !== "") {
+                           processedData[schemaKey] = value.toString().trim();
+                        }
+                    } else {
+                        // Numeric stats
+                        processedData[schemaKey] = safeParseFloat(value);
+                    }
+                }
+            });
+
+            // Link Employee
+            if (employeeMap.has(transporterId)) {
+                processedData.employeeId = employeeMap.get(transporterId);
+            }
+
+            return {
+                updateOne: {
+                    filter: { week: processedData.week, transporterId: processedData.transporterId },
+                    update: { $set: processedData },
+                    upsert: true
+                }
+            };
+        }).filter((op): op is NonNullable<typeof op> => op !== null);
+
+        if (operations.length > 0) {
+            const result = await SymxCustomerDeliveryFeedback.bulkWrite(operations);
+            return NextResponse.json({ 
+                success: true, 
+                count: (result.upsertedCount || 0) + (result.modifiedCount || 0),
+                inserted: result.upsertedCount || 0,
+                updated: result.modifiedCount || 0,
+                matched: result.matchedCount 
+            });
+        }
+        
+        return NextResponse.json({ success: true, count: 0, inserted: 0, updated: 0 });
     }
 
     return NextResponse.json({ error: "Invalid import type" }, { status: 400 });

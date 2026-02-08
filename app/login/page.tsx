@@ -131,31 +131,34 @@ export default function LoginPage() {
         
         {/* Logo Section */}
         <div className={`flex flex-col items-center mb-10 transition-all duration-1000 delay-200 ease-out ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'}`}>
-          <div className="relative group">
-            {/* Spotlight behind logo for contrast */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/40 blur-3xl rounded-full scale-125 group-hover:bg-white/50 group-hover:scale-135 transition-all duration-700" />
-            
-            <Image
-              src="/symx-logo.png"
-              alt="SYMX Logistics"
-              width={280}
-              height={80}
-              className="relative object-contain drop-shadow-sm transition-transform duration-700 hover:scale-[1.03] animate-logo-entrance"
-              priority
-            />
+          <div className="relative group overflow-hidden px-4 py-2">
+            <div className="relative">
+              <Image
+                src="/symx-logo.png"
+                alt="SYMX Logistics"
+                width={280}
+                height={80}
+                className="relative object-contain transition-transform duration-700 hover:scale-[1.03] animate-logo-reveal drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                priority
+              />
+              {/* Shimmer overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-logo-shimmer pointer-events-none" />
+            </div>
           </div>
           
-          {/* Divider line with animation */}
-          <div className={`mt-6 h-px w-16 bg-gradient-to-r from-transparent via-blue-500 to-transparent transition-all duration-1000 delay-700 ${mounted ? 'opacity-100 w-16' : 'opacity-0 w-0'}`} />
-          
-          <h1 className={`mt-5 text-xl font-medium tracking-wide text-white text-center transition-all duration-700 delay-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
-            {isForgotMode ? "Recover Password" : "Welcome Back"}
-          </h1>
-          <p className={`text-zinc-200 mt-1.5 text-sm font-light text-center transition-all duration-700 delay-600 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
-            {isForgotMode 
-              ? "Submit your email and we'll send your password" 
-              : "Sign in to your account to continue"}
-          </p>
+          <div className="flex flex-col items-center">
+            {/* Divider line with animation */}
+            <div className={`mt-6 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent transition-all duration-1000 delay-1000 ${mounted ? 'opacity-100 w-24' : 'opacity-0 w-0'}`} />
+            
+            <h1 className={`mt-5 text-xl font-medium tracking-widest text-white text-center uppercase transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-95 blur-sm'}`}>
+              {isForgotMode ? "Recover Password" : "Welcome Back"}
+            </h1>
+            <p className={`text-zinc-400 mt-2 text-xs uppercase tracking-[0.3em] font-light text-center transition-all duration-1000 delay-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+              {isForgotMode 
+                ? "Submit your email to recover access" 
+                : "Sign in to your account to continue"}
+            </p>
+          </div>
         </div>
 
         {/* Form Card */}
@@ -296,25 +299,34 @@ export default function LoginPage() {
       </footer>
 
       <style jsx global>{`
-        /* ── Logo Entrance ── */
-        @keyframes logoEntrance {
+        /* ── Logo Reveal ── */
+        @keyframes logoReveal {
           0% { 
             opacity: 0; 
-            transform: scale(0.8) translateY(-20px); 
-            filter: blur(10px);
-          }
-          60% { 
-            opacity: 1; 
-            transform: scale(1.02) translateY(0); 
-            filter: blur(0);
+            clip-path: inset(0 100% 0 0);
+            transform: translateX(-30px) scale(0.98);
+            filter: blur(12px);
           }
           100% { 
-            transform: scale(1) translateY(0); 
+            opacity: 1; 
+            clip-path: inset(0 0 0 0);
+            transform: translateX(0) scale(1);
             filter: blur(0);
           }
         }
-        .animate-logo-entrance {
-          animation: logoEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .animate-logo-reveal {
+          animation: logoReveal 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+
+        /* ── Logo Shimmer ── */
+        @keyframes logoShimmer {
+          0% { transform: translateX(-150%) skewX(-25deg); opacity: 0; }
+          20% { opacity: 1; }
+          40% { transform: translateX(150%) skewX(-25deg); opacity: 0; }
+          100% { transform: translateX(150%) skewX(-25deg); opacity: 0; }
+        }
+        .animate-logo-shimmer {
+          animation: logoShimmer 4s cubic-bezier(0.445, 0.05, 0.55, 0.95) 2s infinite;
         }
 
         /* ── Slow Pulse ── */

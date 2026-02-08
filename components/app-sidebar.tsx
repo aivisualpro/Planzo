@@ -12,6 +12,16 @@ import {
   IconSettings,
   IconUser,
   IconUsers,
+  IconCrown,
+  IconTruckDelivery,
+  IconCalendarTime,
+  IconSun,
+  IconCar,
+  IconUsersGroup,
+  IconAlertTriangle,
+  IconShield,
+  IconTie,
+  IconChartBar,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -57,14 +67,54 @@ const data = {
       icon: IconDashboard,
     },
     {
-      name: "Users",
-      url: "/admin/users",
-      icon: IconUser,
+      name: "Owner",
+      url: "/owner",
+      icon: IconCrown,
     },
     {
-      name: "Employees",
-      url: "/admin/employees",
-      icon: IconUsers,
+      name: "Dispatch",
+      url: "/dispatch",
+      icon: IconTruckDelivery,
+    },
+    {
+      name: "Scheduling",
+      url: "#",
+      icon: IconCalendarTime,
+    },
+    {
+      name: "Everyday",
+      url: "#",
+      icon: IconSun,
+    },
+    {
+      name: "Fleet",
+      url: "#",
+      icon: IconCar,
+    },
+    {
+      name: "HR",
+      url: "/hr",
+      icon: IconUsersGroup,
+    },
+    {
+      name: "Incidents",
+      url: "#",
+      icon: IconAlertTriangle,
+    },
+    {
+      name: "Insurance",
+      url: "#",
+      icon: IconShield,
+    },
+    {
+      name: "Manager",
+      url: "/manager",
+      icon: IconTie,
+    },
+    {
+      name: "Reports",
+      url: "/reports",
+      icon: IconChartBar,
     },
   ],
 };
@@ -187,7 +237,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {filteredAdmin.length > 0 && <NavDocuments items={filteredAdmin} label="Admin" />}
+        {filteredAdmin.length > 0 && <NavDocuments items={filteredAdmin} />}
         {filteredSecondary.length > 0 && <NavSecondary items={filteredSecondary} className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>

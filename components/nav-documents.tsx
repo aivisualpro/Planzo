@@ -39,14 +39,14 @@ export function NavDocuments({
     icon: Icon;
     badge?: number | string;
   }[];
-  label: string;
+  label?: string;
 }) {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
