@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { refreshContainerTracking } from '@/lib/shipment-refresh';
+import { getSeaRatesTracking } from '@/lib/searates';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await refreshContainerTracking(container);
+    const data = await getSeaRatesTracking(container);
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('SeaRates Error:', error);

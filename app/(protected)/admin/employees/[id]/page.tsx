@@ -147,7 +147,7 @@ export default function EmployeeDetailPage(props: PageProps) {
 
   return (
     <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* LEFT COLUMN: Profile & Key Stats (Sidebar) */}
         <div className="lg:col-span-4 space-y-6">

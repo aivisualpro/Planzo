@@ -3,9 +3,8 @@ import { Resend } from "resend";
 import connectToDatabase from "@/lib/db";
 import SymxUser from "@/lib/models/SymxUser";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY || "missing-key");
   try {
     const { email } = await request.json();
     await connectToDatabase();
