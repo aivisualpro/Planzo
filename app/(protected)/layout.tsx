@@ -5,23 +5,20 @@ import { HeaderActionsProvider } from "@/components/providers/header-actions-pro
 import { cookies } from "next/headers";
 import { getSession, logout } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 import { redirect } from "next/navigation";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   
   // Extra security: Verify status in database on every page load
-  if (session && session.id) {
+  if (session && session.id && session.id !== "super-admin") {
     try {
       await connectToDatabase();
-      const userId = String(session.id);
-      if (userId.match(/^[0-9a-fA-F]{24}$/)) {
-        const user = await User.findById(userId).select('isActive');
-        if (!user || !user.isActive) {
-          await logout();
-          redirect("/login");
-        }
+      const employee = await Employee.findOne({ email: session.email });
+      if (!employee) {
+        await logout();
+        redirect("/login");
       }
     } catch (error) {
        console.error("Layout Auth Check Error:", error);

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession, logout } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 
 export async function GET() {
   const session = await getSession();
@@ -9,17 +9,17 @@ export async function GET() {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
-  // Super Admin bypass — no DB user to look up
+  // Super Admin bypass — no DB employee to look up
   if (session.id === "super-admin") {
     return NextResponse.json({ authenticated: true, user: session });
   }
 
   await connectToDatabase();
-  const user = await User.findById(session.id);
+  const employee = await Employee.findOne({ email: session.email });
 
-  if (!user || !user.isActive) {
+  if (!employee) {
     await logout();
-    return NextResponse.json({ authenticated: false, error: "Account inactive" }, { status: 401 });
+    return NextResponse.json({ authenticated: false, error: "Account not found" }, { status: 401 });
   }
 
   return NextResponse.json({ authenticated: true, user: session });

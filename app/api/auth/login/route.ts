@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { login } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 
 export async function POST(request: Request) {
   console.log("[Auth API] Login request received");
@@ -37,24 +37,22 @@ export async function POST(request: Request) {
     const dbEnd = Date.now();
     console.log(`[Auth API] DB Connection took: ${dbEnd - start}ms`);
     
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const employee = await Employee.findOne({ email: email.toLowerCase() });
     const userEnd = Date.now();
-    console.log(`[Auth API] User Lookup took: ${userEnd - dbEnd}ms`);
+    console.log(`[Auth API] Employee Lookup took: ${userEnd - dbEnd}ms`);
 
-    if (!user || user.password !== password) {
+    // Employee uses strict: false, so password may exist as an extra field
+    const empPassword = (employee as any)?.password;
+    if (!employee || empPassword !== password) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    if (!user.isActive) {
-      return NextResponse.json({ error: "Your account is inactive. Please contact your administrator." }, { status: 403 });
-    }
-
     const userData = {
-      id: user._id.toString(),
-      email: user.email,
-      name: user.name,
-      role: user.AppRole || "Manager",
-      avatar: user.profilePicture || "/logo.png",
+      id: employee._id.toString(),
+      email: employee.email,
+      name: employee.fullName,
+      role: (employee as any).AppRole || employee.role || "Manager",
+      avatar: employee.picture || "/logo.png",
     };
 
     const loginStart = Date.now();

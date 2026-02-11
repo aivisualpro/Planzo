@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 import { getSession } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
-    const items = await User.find({}, 
-      "name email phone AppRole designation isActive serialNo profilePicture location createdAt"
+    const items = await Employee.find({}, 
+      "uniqueId employeeId fullName role email picture color initials sort createdAt"
     ).lean();
     return NextResponse.json(items);
   } catch (error) {
@@ -22,12 +22,15 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const session = await getSession();
     const body = await req.json();
-    const newItem = await User.create(body);
+    if (!body.uniqueId) {
+      body.uniqueId = `EMP-${Date.now()}`;
+    }
+    const newItem = await Employee.create(body);
 
     // ── Audit ──
     logAudit({
       eventType: "member_added",
-      description: `User "${newItem.name || newItem.email}" was created`,
+      description: `User "${newItem.fullName || newItem.email}" was created`,
       performedBy: session?.email || session?.id || "system",
       performedByName: session?.name,
       newValue: newItem.email,
@@ -39,4 +42,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
 }
-

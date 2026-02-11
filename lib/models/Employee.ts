@@ -11,6 +11,11 @@ export interface IEmployee extends Document {
   color?: string;
   initials?: string;
   sort?: number;
+  activeTaskTimer?: {
+    taskId: string;
+    startTime: Date;
+    taskName?: string;
+  };
 }
 
 const EmployeeSchema: Schema = new Schema({
@@ -23,6 +28,11 @@ const EmployeeSchema: Schema = new Schema({
   color: { type: String },
   initials: { type: String },
   sort: { type: Number },
+  activeTaskTimer: {
+    taskId: { type: String },
+    startTime: { type: Date },
+    taskName: { type: String },
+  },
 }, { timestamps: true, collection: 'planzoEmployees', strict: false });
 
 const Employee: Model<IEmployee> = mongoose.models.Employee || mongoose.model<IEmployee>('Employee', EmployeeSchema);

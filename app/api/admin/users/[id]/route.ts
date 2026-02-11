@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 import { getSession } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params;
     await connectToDatabase();
-    const item = await User.findById(id);
+    const item = await Employee.findById(id);
     if (!item) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
@@ -25,7 +25,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await connectToDatabase();
     const session = await getSession();
     const body = await req.json();
-    const updatedItem = await User.findByIdAndUpdate(id, body, { new: true });
+    const updatedItem = await Employee.findByIdAndUpdate(id, body, { new: true });
     if (!updatedItem) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
@@ -33,7 +33,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     // ── Audit ──
     logAudit({
       eventType: "member_added",
-      description: `User "${updatedItem.name || updatedItem.email}" was updated`,
+      description: `User "${updatedItem.fullName || updatedItem.email}" was updated`,
       performedBy: session?.email || session?.id || "system",
       performedByName: session?.name,
       field: Object.keys(body).join(", "),
@@ -51,7 +51,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
     await connectToDatabase();
     const session = await getSession();
-    const deletedItem = await User.findByIdAndDelete(id);
+    const deletedItem = await Employee.findByIdAndDelete(id);
     if (!deletedItem) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
@@ -59,7 +59,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     // ── Audit ──
     logAudit({
       eventType: "member_removed",
-      description: `User "${deletedItem.name || deletedItem.email}" was removed`,
+      description: `User "${deletedItem.fullName || deletedItem.email}" was removed`,
       performedBy: session?.email || session?.id || "system",
       performedByName: session?.name,
       oldValue: deletedItem.email,
@@ -71,4 +71,3 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }
-

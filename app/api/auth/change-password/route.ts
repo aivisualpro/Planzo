@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     await connectToDatabase();
-    await User.findByIdAndUpdate(userId, { password: newPassword });
+    await Employee.findByIdAndUpdate(userId, { password: newPassword });
 
     return NextResponse.json({ success: true, message: "Password updated successfully" });
   } catch (error: any) {

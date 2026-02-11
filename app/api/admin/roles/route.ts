@@ -1,9 +1,7 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import AppRole from "@/lib/models/AppRole";
-
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,14 +9,14 @@ export async function GET(req: NextRequest) {
     // Sort items by name by default
     const roles = await AppRole.find({}).sort({ name: 1 }).lean();
     
-    // Aggregate user counts
-    const userCounts = await User.aggregate([
-      { $group: { _id: "$AppRole", count: { $sum: 1 } } }
+    // Aggregate employee counts by role
+    const roleCounts = await Employee.aggregate([
+      { $group: { _id: "$role", count: { $sum: 1 } } }
     ]);
 
     // Merge counts
     const rolesWithCounts = roles.map((role: any) => {
-        const found = userCounts.find(c => c._id === role.name);
+        const found = roleCounts.find((c: any) => c._id === role.name);
         return { ...role, userCount: found ? found.count : 0 };
     });
 

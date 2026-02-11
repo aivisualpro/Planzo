@@ -1,8 +1,7 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import User from "@/lib/models/User";
+import Employee from "@/lib/models/Employee";
 import Task from "@/lib/models/Task";
 
 export async function GET() {
@@ -13,13 +12,14 @@ export async function GET() {
     }
 
     await connectToDatabase();
-    const user = await User.findOne({ email: session.email }).select('activeTaskTimer');
+    const employee = await Employee.findOne({ email: session.email }).select('activeTaskTimer');
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!employee) {
+      // Return null timer gracefully instead of 404 (e.g. Super Admin bypass)
+      return NextResponse.json({ activeTimer: null });
     }
 
-    return NextResponse.json({ activeTimer: user.activeTaskTimer || null });
+    return NextResponse.json({ activeTimer: employee.activeTaskTimer || null });
   } catch (error) {
     console.error("Error fetching active timer:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -36,26 +36,30 @@ export async function POST(req: NextRequest) {
     const { action, taskId } = await req.json();
     await connectToDatabase();
 
-    const user = await User.findOne({ email: session.email });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    // Find or create employee record for this session
+    let employee = await Employee.findOne({ email: session.email });
+    if (!employee) {
+      // Auto-create an employee record (handles Super Admin or new users)
+      employee = await Employee.create({
+        uniqueId: `EMP-${Date.now()}`,
+        fullName: session.name || 'Unknown',
+        email: session.email,
+        role: session.role || 'Manager',
+      });
     }
 
     if (action === 'start') {
-      if (user.activeTaskTimer) {
-        // Stop current timer first? Or just error?
-        // Let's auto-stop the previous timer to be safe.
-        // Or simply overwrite. If we overwrite, we lose the previous time.
-        // Better to stop it properly.
-        const prevTask = await Task.findOne({ taskId: user.activeTaskTimer.taskId });
+      if (employee.activeTaskTimer) {
+        // Auto-stop the previous timer
+        const prevTask = await Task.findOne({ taskId: employee.activeTaskTimer.taskId });
         if (prevTask) {
-             const startTime = new Date(user.activeTaskTimer.startTime);
+             const startTime = new Date(employee.activeTaskTimer.startTime);
              const endTime = new Date();
              const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
              
              // Update previous task timeLogged
              await Task.updateOne(
-                { taskId: user.activeTaskTimer.taskId },
+                { taskId: employee.activeTaskTimer.taskId },
                 { $inc: { timeLogged: durationHours } }
              );
         }
@@ -67,22 +71,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Task not found" }, { status: 404 });
       }
 
-      user.activeTaskTimer = {
+      employee.activeTaskTimer = {
         taskId,
         startTime: new Date(),
         taskName: task.taskName
       };
-      await user.save();
+      await employee.save();
 
-      return NextResponse.json({ activeTimer: user.activeTaskTimer });
+      return NextResponse.json({ activeTimer: employee.activeTaskTimer });
     } 
     
     if (action === 'stop') {
-      if (!user.activeTaskTimer) {
+      if (!employee.activeTaskTimer) {
         return NextResponse.json({ message: "No active timer to stop" });
       }
 
-      const activeTask = user.activeTaskTimer;
+      const activeTask = employee.activeTaskTimer;
       const startTime = new Date(activeTask.startTime);
       const endTime = new Date();
       const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
@@ -94,8 +98,8 @@ export async function POST(req: NextRequest) {
       );
 
       // Clear timer
-      user.activeTaskTimer = undefined;
-      await user.save();
+      employee.activeTaskTimer = undefined;
+      await employee.save();
 
       return NextResponse.json({ message: "Timer stopped", duration: durationHours });
     }
