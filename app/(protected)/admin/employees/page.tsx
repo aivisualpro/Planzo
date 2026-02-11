@@ -236,9 +236,24 @@ export default function EmployeesPage() {
     },
   ];
 
-  // Define initial visibility: Show key fields, hide others
+  // Define initial visibility: Show key fields, hide less common ones
   const initialVisibility = {
-    eeCode: false,
+    // Visible by default: profileImage, firstName, lastName, email, phoneNumber, type, status, actions
+    // Also show these key fields:
+    eeCode: true,
+    rate: true,
+    eligibility: true,
+    defaultVan1: true,
+    hiredDate: true,
+    // Weekly schedule visible
+    sunday: true,
+    monday: true,
+    tuesday: true,
+    wednesday: true,
+    thursday: true,
+    friday: true,
+    saturday: true,
+    // Hidden by default:
     transporterId: false,
     badgeNumber: false,
     streetAddress: false,
@@ -246,25 +261,15 @@ export default function EmployeesPage() {
     state: false,
     zipCode: false,
     gender: false,
-    hiredDate: false,
     dob: false,
     hourlyStatus: false,
-    rate: false,
     gasCardPin: false,
     dlExpiration: false,
     motorVehicleReportDate: false,
-    defaultVan1: false,
     defaultVan2: false,
     defaultVan3: false,
     routesComp: false,
     ScheduleNotes: false,
-    sunday: false,
-    monday: false,
-    tuesday: false,
-    wednesday: false,
-    thursday: false,
-    friday: false,
-    saturday: false,
     offerLetterFile: false,
     handbookFile: false,
     driversLicenseFile: false,
@@ -280,7 +285,6 @@ export default function EmployeesPage() {
     resignationDate: false,
     resignationType: false,
     resignationLetter: false,
-    eligibility: false,
     lastDateWorked: false,
     exitInterviewNotes: false,
   };
@@ -296,7 +300,7 @@ export default function EmployeesPage() {
          loading={loading}
          showColumnToggle={true}
          initialColumnVisibility={initialVisibility}
-         searchKey="email"
+         enableGlobalFilter={true}
       />
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

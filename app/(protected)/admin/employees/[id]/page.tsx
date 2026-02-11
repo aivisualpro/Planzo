@@ -14,7 +14,6 @@ import {
   FileText, 
   ShieldCheck, 
   AlertTriangle,
-  ChevronLeft,
   Pencil,
   CheckCircle2,
   XCircle,
@@ -27,11 +26,17 @@ import {
   Zap,
   Award,
   BarChart3,
-  Target
+  Target,
+  Hash,
+  CreditCard,
+  FileCheck,
+  Download,
+  ExternalLink,
+  ChevronRight,
+  UserCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -53,95 +58,47 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-/* ── Availability Card (top-level for perf) ── */
-const AvailabilityCard = ({ day, date, status, dayKey, handleStatusChange }: any) => {
-  const statusConfig: Record<string, { icon: any; color: string; bg: string; border: string; text: string }> = {
-    'Route':           { icon: Truck,         color: 'text-[#16C47F]',     bg: 'bg-[#16C47F]/10',     border: 'border-[#16C47F]/20',   text: 'text-[#16C47F]' },
-    'Assign Schedule': { icon: CalendarCheck,  color: 'text-[#F29727]',     bg: 'bg-[#F29727]/10',     border: 'border-[#F29727]/20',   text: 'text-[#F29727]' },
-    'Open':            { icon: CheckCircle2,   color: 'text-[#D2665A]',     bg: 'bg-[#D2665A]/10',     border: 'border-[#D2665A]/20',   text: 'text-[#D2665A]' },
-    'Close':           { icon: Clock,          color: 'text-[#FFB4A2]',     bg: 'bg-[#FFB4A2]/10',     border: 'border-[#FFB4A2]/20',   text: 'text-[#FFB4A2]' },
-    'OFF':             { icon: XCircle,        color: 'text-[#5E686D]',     bg: 'bg-transparent',      border: 'border-[#5E686D]/20',   text: 'text-[#5E686D]' },
+/* ── Availability Day Pill ── */
+const DayPill = ({ day, date, status, dayKey, handleStatusChange }: any) => {
+  const statusConfig: Record<string, { color: string; bg: string; dot: string; label: string }> = {
+    'Route':           { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-500', label: 'Route' },
+    'Assign Schedule': { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', dot: 'bg-amber-500', label: 'Assign' },
+    'Open':            { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', dot: 'bg-blue-500', label: 'Open' },
+    'Close':           { color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20', dot: 'bg-rose-500', label: 'Close' },
+    'OFF':             { color: 'text-zinc-400 dark:text-zinc-500', bg: 'bg-zinc-500/5 border-zinc-500/10', dot: 'bg-zinc-400', label: 'OFF' },
   };
   const config = statusConfig[status] || statusConfig['OFF'];
-  const Icon = config.icon;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className={cn(
-          "flex flex-col items-center justify-center p-3 rounded-2xl border transition-all hover:scale-[1.02] active:scale-95 group relative overflow-hidden h-full min-h-[90px] cursor-pointer",
-          config.bg, config.border
+          "flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border transition-all hover:scale-[1.03] active:scale-95 cursor-pointer min-w-0",
+          config.bg
         )}>
-          <div className="flex flex-col items-center mb-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 group-hover:text-foreground transition-colors leading-none mb-1">{day}</span>
-            <span className="text-[9px] font-bold text-muted-foreground/40 leading-none">{date}</span>
-          </div>
-          <Icon className={cn("w-5 h-5 mb-2 transition-transform group-hover:scale-110", config.color)} />
-          <span className={cn("text-[9px] font-black uppercase tracking-tighter leading-none whitespace-nowrap", config.text)}>
-            {status === 'Assign Schedule' ? 'Assign' : status}
-          </span>
+          <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 leading-none">{day}</span>
+          <span className="text-[8px] text-muted-foreground/40 leading-none">{date}</span>
+          <div className={cn("w-2 h-2 rounded-full my-1", config.dot)} />
+          <span className={cn("text-[8px] font-black uppercase tracking-tight leading-none", config.color)}>{config.label}</span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="min-w-[160px] rounded-xl p-1.5 shadow-2xl border border-border bg-popover/95 backdrop-blur-md">
+      <DropdownMenuContent align="center" className="min-w-[150px] rounded-xl p-1 shadow-xl">
         {Object.entries(statusConfig).map(([id, cfg]) => (
           <DropdownMenuItem 
             key={id} 
             onClick={() => handleStatusChange(dayKey, id)}
             className={cn(
-              "text-[10px] font-bold py-2.5 px-3 rounded-lg cursor-pointer flex items-center justify-between transition-colors",
+              "text-[10px] font-bold py-2 px-3 rounded-lg cursor-pointer flex items-center gap-2",
               status === id ? "bg-primary/10 text-primary" : "hover:bg-accent"
             )}
           >
-            <div className="flex items-center gap-2.5">
-              <div className={cn("p-1 rounded-md", cfg.bg)}>
-                <cfg.icon className={cn("w-3.5 h-3.5", cfg.color)} />
-              </div>
-              {id}
-            </div>
-            {status === id && <CheckCircle2 className="w-3 h-3 text-primary animate-in zoom-in-50 duration-300" />}
+            <div className={cn("w-2 h-2 rounded-full", cfg.dot)} />
+            {id}
+            {status === id && <CheckCircle2 className="w-3 h-3 text-primary ml-auto" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-};
-
-/* ── Performance Stat Card ── */
-const PerformanceMetric = ({ label, value, icon: Icon, accent, trend, progressColor }: { label: string; value: string | number; icon: any; accent: string; trend?: string; progressColor?: string }) => {
-  const isPercentage = typeof value === 'string' && value.includes('%');
-  const numericValue = isPercentage ? parseInt(value as string) : 0;
-
-  return (
-    <div className={cn(
-      "relative p-4 rounded-2xl border bg-card backdrop-blur-sm transition-all hover:shadow-md group overflow-hidden",
-      "border-border/60 hover:border-border dark:border-white/10 dark:hover:border-white/20 dark:bg-white/[0.04]"
-    )}>
-      <div className={cn("absolute top-0 left-0 w-1 h-full rounded-r-full", accent)} />
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{label}</span>
-        <div className="p-1.5 rounded-lg bg-muted/40 dark:bg-white/[0.06] group-hover:bg-muted dark:group-hover:bg-white/10 transition-colors">
-          <Icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
-        </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-end gap-2">
-          <span className="text-2xl font-black tracking-tight text-foreground leading-none">{value}</span>
-          {trend && (
-            <span className="text-[10px] font-bold text-emerald-500 dark:text-emerald-400 flex items-center gap-0.5 mb-0.5">
-              <TrendingUp className="w-3 h-3" /> {trend}
-            </span>
-          )}
-        </div>
-        {isPercentage && progressColor && (
-          <div className="h-1.5 w-full bg-muted/50 dark:bg-white/10 rounded-full overflow-hidden mt-1">
-            <div 
-              className={cn("h-full rounded-full transition-all duration-1000 ease-out", progressColor)} 
-              style={{ width: `${numericValue}%` }}
-            />
-          </div>
-        )}
-      </div>
-    </div>
   );
 };
 
@@ -155,7 +112,6 @@ export default function EmployeeDetailPage(props: PageProps) {
 
   const handleStatusChange = async (dayKey: string, newStatus: string) => {
     if (!employee) return;
-    
     const oldEmployee = employee;
     const updatedEmployee = { ...employee, [dayKey]: newStatus };
     setEmployee(updatedEmployee as IEmployee);
@@ -166,10 +122,9 @@ export default function EmployeeDetailPage(props: PageProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [dayKey]: newStatus }),
       });
-      
-      if (!response.ok) throw new Error("Failed to update availability");
+      if (!response.ok) throw new Error("Failed to update");
       toast.success(`${dayKey.charAt(0).toUpperCase() + dayKey.slice(1)} updated`);
-    } catch (error) {
+    } catch {
       setEmployee(oldEmployee);
       toast.error("Failed to update availability");
     }
@@ -182,7 +137,6 @@ export default function EmployeeDetailPage(props: PageProps) {
           {employee.fullName}
         </h1>
       );
-
       setRightContent(
         <Button 
           size="sm"
@@ -193,11 +147,7 @@ export default function EmployeeDetailPage(props: PageProps) {
         </Button>
       );
     }
-
-    return () => {
-      setLeftContent(null);
-      setRightContent(null);
-    };
+    return () => { setLeftContent(null); setRightContent(null); };
   }, [employee, setLeftContent, setRightContent]);
 
   useEffect(() => {
@@ -211,7 +161,7 @@ export default function EmployeeDetailPage(props: PageProps) {
           toast.error("Employee not found");
           router.push("/admin/employees");
         }
-      } catch (error) {
+      } catch {
         toast.error("Error fetching employee details");
       } finally {
         setLoading(false);
@@ -223,435 +173,404 @@ export default function EmployeeDetailPage(props: PageProps) {
   if (loading) {
     return (
       <div className="flex h-[600px] items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
   if (!employee) return null;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Active": return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15 border-none shadow-none text-[10px] font-bold">Active</Badge>;
-      case "Terminated": return <Badge className="bg-red-500/15 text-red-700 dark:text-red-400 hover:bg-red-500/15 border-none shadow-none text-[10px] font-bold">Terminated</Badge>;
-      case "Resigned": return <Badge className="bg-orange-500/15 text-orange-700 dark:text-orange-400 hover:bg-orange-500/15 border-none shadow-none text-[10px] font-bold">Resigned</Badge>;
-      default: return <Badge variant="secondary">{status}</Badge>;
-    }
+  const statusColors: Record<string, string> = {
+    Active: "bg-emerald-500",
+    Terminated: "bg-red-500",
+    Resigned: "bg-amber-500",
+    Inactive: "bg-zinc-400",
   };
 
-  const InfoRow = ({ label, value, icon: Icon, className }: { label: string, value?: any, icon?: any, className?: string }) => (
-    <div className={cn("flex flex-col gap-1.5 p-3 rounded-xl bg-muted/30 dark:bg-white/[0.04] border border-border/50 dark:border-white/10 transition-all hover:bg-muted/50 dark:hover:bg-white/[0.08]", className)}>
-      <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.12em]">
-        {Icon && <Icon className="w-3 h-3" />}
-        {label}
+  // Info display helper
+  const InfoItem = ({ icon: Icon, label, value, accent }: { icon: any; label: string; value?: any; accent?: string }) => (
+    <div className="flex items-center gap-3 py-2.5">
+      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", accent || "bg-muted/50 dark:bg-white/[0.06]")}>
+        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
       </div>
-      <div className="text-sm font-semibold text-foreground min-h-[1.25rem]">
-        {value || <span className="text-muted-foreground/50 font-normal italic text-xs">Not provided</span>}
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider leading-none mb-1">{label}</p>
+        <p className="text-sm font-semibold text-foreground truncate leading-none">
+          {value || <span className="text-muted-foreground/40 font-normal italic text-xs">—</span>}
+        </p>
       </div>
     </div>
   );
 
-  const FileCard = ({ label, url, icon: Icon }: { label: string, url?: string, icon: any }) => (
-    <Card className="overflow-hidden border-dashed border-2 border-border/50 dark:border-white/10 hover:border-primary/50 transition-all group bg-card">
-      <CardContent className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-            <Icon className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold">{label}</p>
-            <p className="text-xs text-muted-foreground">{url ? "Document uploaded" : "No document"}</p>
-          </div>
-        </div>
-        {url && (
-          <Button variant="ghost" size="sm" asChild>
-            <a href={url} target="_blank" rel="noopener noreferrer">View</a>
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+  const FileItem = ({ label, url, icon: Icon }: { label: string; url?: string; icon: any }) => (
+    <div className={cn(
+      "flex items-center gap-3 p-3 rounded-xl border transition-all group",
+      url ? "bg-card border-border/50 hover:border-primary/30 hover:shadow-sm cursor-pointer" : "bg-muted/20 border-dashed border-border/30"
+    )}
+      onClick={() => url && window.open(url, '_blank')}
+    >
+      <div className={cn(
+        "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
+        url ? "bg-primary/10 group-hover:bg-primary/20" : "bg-muted/50"
+      )}>
+        <Icon className={cn("w-4 h-4", url ? "text-primary" : "text-muted-foreground/40")} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-foreground leading-none">{label}</p>
+        <p className={cn("text-[10px] mt-1 leading-none", url ? "text-primary/70" : "text-muted-foreground/40")}>
+          {url ? "Document uploaded" : "Not uploaded"}
+        </p>
+      </div>
+      {url && <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />}
+    </div>
   );
 
   return (
     <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* ════════ LEFT COLUMN: Profile + Employee Info ════════ */}
-        <div className="lg:col-span-4 space-y-5">
-          {/* ── Redesigned Profile Card + Address ── */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 shadow-none bg-card rounded-[32px] overflow-hidden">
-            <CardContent className="p-6">
-               {/* Header Link - Flex Row */}
-               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-8">
-                  {/* Avatar - Left */}
-                  <div className="relative shrink-0">
-                     <div className="w-24 h-24 rounded-full overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-sm bg-muted/20">
-                        {employee.profileImage ? (
-                           <img src={employee.profileImage} alt={employee.firstName} className="w-full h-full object-cover" />
-                        ) : (
-                           <div className="w-full h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 text-muted-foreground">
-                              <User className="w-10 h-10 opacity-50" />
-                           </div>
-                        )}
-                     </div>
-                  </div>
+        {/* ════════ LEFT COLUMN: Profile Card ════════ */}
+        <div className="lg:col-span-4 space-y-4">
+          
+          {/* ── Hero Profile Card ── */}
+          <div className="rounded-2xl border border-border/50 dark:border-white/10 bg-card overflow-hidden">
+            {/* Profile Header with Gradient */}
+            <div className="relative h-24 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
+              <div className="absolute -bottom-10 left-5">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden border-4 border-card bg-muted shadow-lg">
+                  {employee.profileImage ? (
+                    <img src={employee.profileImage} alt={employee.firstName} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                      <User className="w-8 h-8 text-primary/50" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Status Dot */}
+              <div className="absolute top-4 right-4 flex items-center gap-2">
+                <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", statusColors[employee.status] || "bg-zinc-400")} />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/70">{employee.status}</span>
+              </div>
+            </div>
 
-                  {/* Name & Status - Right */}
-                  <div className="text-center sm:text-left space-y-1.5 pt-1.5 flex-1">
-                     <h2 className="text-2xl font-black text-foreground tracking-tight uppercase leading-none break-words">
-                        {employee.firstName}<br/>{employee.lastName}
-                     </h2>
-                     <div className="flex flex-wrap gap-2 justify-center sm:justify-start items-center">
-                        {getStatusBadge(employee.status)}
-                        <span className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold text-muted-foreground uppercase tracking-wide border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-default">
-                           {employee.type || "Employee"}
-                        </span>
-                        <span className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold text-muted-foreground uppercase tracking-wide border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-default">
-                           {employee.eeCode || "N/A"}
-                        </span>
-                     </div>
-                  </div>
-               </div>
+            {/* Profile Info */}
+            <div className="pt-14 px-5 pb-5">
+              <h2 className="text-xl font-black text-foreground tracking-tight leading-tight">
+                {employee.firstName} {employee.lastName}
+              </h2>
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <Badge variant="secondary" className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">
+                  {employee.type || "Employee"}
+                </Badge>
+                {employee.eeCode && (
+                  <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border-border/50">
+                    {employee.eeCode}
+                  </Badge>
+                )}
+                <Badge 
+                  className={cn(
+                    "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border-none",
+                    employee.eligibility 
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
+                      : "bg-red-500/10 text-red-600 dark:text-red-400"
+                  )}
+                >
+                  {employee.eligibility ? "Eligible" : "Ineligible"}
+                </Badge>
+              </div>
 
-               {/* Info Blocks */}
-               <div className="space-y-6">
-                  {/* Contact Info */}
-                  <div className="space-y-3">
-                     <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50">
-                        <div className="flex items-center gap-2">
-                           <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Email</span>
-                        </div>
-                        <span className="text-xs font-bold text-foreground truncate max-w-[180px]">{employee.email || "—"}</span>
-                     </div>
-                     <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50">
-                        <div className="flex items-center gap-2">
-                           <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Phone</span>
-                        </div>
-                        <span className="text-xs font-bold text-foreground">{formatPhoneNumber(employee.phoneNumber || "")}</span>
-                     </div>
-                     <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50/30 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
-                        <div className="flex items-center gap-2">
-                           <DollarSign className="w-3.5 h-3.5 text-blue-500" />
-                           <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Rate</span>
-                        </div>
-                        <span className="text-sm font-black text-blue-700 dark:text-blue-300">${employee.rate || 0}</span>
-                     </div>
+              <Separator className="my-4 bg-border/40" />
 
-                     {/* Chips Moved Here */}
-                     <div className="flex flex-wrap gap-2 pt-1">
-                        <div className="px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
-                           <User className="w-3 h-3" />
-                           {employee.gender || "N/A"}
-                        </div>
-                        <div className="px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
-                           <Calendar className="w-3 h-3" />
-                           {employee.dob ? format(new Date(employee.dob), "MMM d") : "N/A"}
-                        </div>
-                        <div className={cn(
-                           "px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase flex items-center gap-1.5",
-                           employee.eligibility 
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
-                              : "border-red-200 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
-                        )}>
-                           <div className={cn("w-1.5 h-1.5 rounded-full", employee.eligibility ? "bg-emerald-500" : "bg-red-500")} />
-                           {employee.eligibility ? "Eligible" : "Ineligible"}
-                        </div>
-                     </div>
-                  </div>
+              {/* Contact Details */}
+              <div className="space-y-1">
+                <InfoItem icon={Mail} label="Email" value={employee.email} />
+                <InfoItem icon={Phone} label="Phone" value={formatPhoneNumber(employee.phoneNumber || "")} />
+                <InfoItem icon={DollarSign} label="Rate" value={employee.rate ? `$${employee.rate}/hr` : undefined} accent="bg-blue-500/10" />
+                <InfoItem icon={Calendar} label="Date of Birth" value={employee.dob ? format(new Date(employee.dob), "MMMM d, yyyy") : undefined} />
+                <InfoItem icon={User} label="Gender" value={employee.gender} />
+                <InfoItem icon={Hash} label="Hourly Status" value={(employee as any).hourlyStatus} />
+              </div>
 
-                  <Separator className="bg-border/40" />
+              <Separator className="my-4 bg-border/40" />
 
-                  {/* Inline Address Section */}
-                  <div className="space-y-3">
-                     <div className="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 flex items-start gap-3">
-                        <MapPin className="w-4 h-4 text-muted-foreground/70 mt-0.5 shrink-0" />
-                        <p className="text-xs font-bold text-foreground leading-relaxed">
-                           {[
-                              employee.streetAddress,
-                              employee.city,
-                              employee.state,
-                              employee.zipCode
-                           ].filter(Boolean).join(", ") || "No address provided"}
-                        </p>
-                     </div>
-                  </div>
+              {/* Address */}
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 dark:bg-white/[0.04] border border-border/30">
+                <MapPin className="w-4 h-4 text-muted-foreground/60 mt-0.5 flex-shrink-0" />
+                <p className="text-xs font-medium text-foreground/80 leading-relaxed">
+                  {[employee.streetAddress, employee.city, employee.state, employee.zipCode].filter(Boolean).join(", ") || "No address provided"}
+                </p>
+              </div>
+            </div>
+          </div>
 
-                  <Separator className="bg-border/40" />
-
-                  {/* Merged Weekly Schedule */}
-                  <div className="space-y-4">
-                     <div className="flex items-center gap-2 px-1">
-                        <CalendarCheck className="w-3.5 h-3.5 text-muted-foreground/70" />
-                        <span className="text-[10px] font-black text-muted-foreground/70 uppercase tracking-widest">Weekly Schedule</span>
-                     </div>
-                     <div className="space-y-2">
-                        {/* Top Row: 3 Days */}
-                        <div className="grid grid-cols-3 gap-2">
-                           {['Sun', 'Mon', 'Tue'].map((day, idx) => {
-                              const dayKey = ['sunday', 'monday', 'tuesday'][idx];
-                              const status = String(employee[dayKey as keyof IEmployee] || 'OFF');
-                              const date = format(addDays(startOfWeek(new Date()), idx), "MMM d");
-                              return (
-                                 <AvailabilityCard key={day} day={day} date={date} status={status} dayKey={dayKey} handleStatusChange={handleStatusChange} />
-                              );
-                           })}
-                        </div>
-                        {/* Bottom Row: 4 Days */}
-                        <div className="grid grid-cols-4 gap-2">
-                           {['Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => {
-                              const dayKey = ['wednesday', 'thursday', 'friday', 'saturday'][idx];
-                              const status = String(employee[dayKey as keyof IEmployee] || 'OFF');
-                              const date = format(addDays(startOfWeek(new Date()), idx + 3), "MMM d");
-                              return (
-                                 <AvailabilityCard key={day} day={day} date={date} status={status} dayKey={dayKey} handleStatusChange={handleStatusChange} />
-                              );
-                           })}
-                        </div>
-                     </div>
-                     {employee.ScheduleNotes && (
-                        <div className="p-3 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
-                           <p className="text-[11px] text-foreground/70 italic leading-relaxed font-medium">
-                              {employee.ScheduleNotes}
-                           </p>
-                        </div>
-                     )}
-                  </div>
-
-
-               </div>
-            </CardContent>
-          </Card>
+          {/* ── Weekly Schedule ── */}
+          <div className="rounded-2xl border border-border/50 dark:border-white/10 bg-card p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <CalendarCheck className="w-4 h-4 text-primary" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Weekly Schedule</h3>
+            </div>
+            <div className="grid grid-cols-7 gap-1.5">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => {
+                const dayKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][idx];
+                const status = String(employee[dayKey as keyof IEmployee] || 'OFF');
+                const date = format(addDays(startOfWeek(new Date()), idx), "M/d");
+                return <DayPill key={day} day={day} date={date} status={status} dayKey={dayKey} handleStatusChange={handleStatusChange} />;
+              })}
+            </div>
+            {employee.ScheduleNotes && (
+              <div className="mt-3 p-3 rounded-lg bg-muted/30 dark:bg-white/[0.04] border border-border/20">
+                <p className="text-[11px] text-muted-foreground italic leading-relaxed">{employee.ScheduleNotes}</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* ════════ RIGHT COLUMN: Schedule + Tabs ════════ */}
-        <div className="lg:col-span-8 space-y-6">
+        {/* ════════ RIGHT COLUMN: Tabs ════════ */}
+        <div className="lg:col-span-8 space-y-0">
           <Tabs defaultValue="performance" className="w-full">
-            <TabsList className="bg-muted/30 dark:bg-white/[0.04] p-1 rounded-2xl inline-flex gap-1 h-auto mb-6 border border-border/50 dark:border-white/10">
-              <TabsTrigger 
-                value="performance" 
-                className="rounded-[0.9rem] px-5 py-2 font-bold text-xs data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/30 transition-all"
-              >
-                Performance
-              </TabsTrigger>
-              <TabsTrigger 
-                value="logistics" 
-                className="rounded-[0.9rem] px-5 py-2 font-bold text-xs data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/30 transition-all"
-              >
-                Logistics
-              </TabsTrigger>
-              <TabsTrigger 
-                value="documents" 
-                className="rounded-[0.9rem] px-5 py-2 font-bold text-xs data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/30 transition-all"
-              >
-                Documents
-              </TabsTrigger>
-              {(employee.status === 'Terminated' || employee.status === 'Resigned' || employee.terminationDate || employee.resignationDate) && (
+            <TabsList className="bg-muted/30 dark:bg-white/[0.04] p-1 rounded-xl inline-flex gap-0.5 h-auto mb-5 border border-border/40">
+              {[
+                { value: "performance", label: "Performance" },
+                { value: "logistics", label: "Logistics" },
+                { value: "documents", label: "Documents" },
+                ...(employee.status === 'Terminated' || employee.status === 'Resigned' || employee.terminationDate || employee.resignationDate
+                  ? [{ value: "offboarding", label: "Offboarding" }] : []
+                ),
+              ].map((tab) => (
                 <TabsTrigger 
-                  value="offboarding" 
-                  className="rounded-[0.9rem] px-5 py-2 font-bold text-xs data-[state=active]:bg-card data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400 data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/30 transition-all text-red-500/70"
+                  key={tab.value}
+                  value={tab.value} 
+                  className={cn(
+                    "rounded-lg px-4 py-2 font-bold text-xs transition-all",
+                    "data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary border border-transparent data-[state=active]:border-border/30",
+                    tab.value === "offboarding" && "text-red-500/60 data-[state=active]:text-red-500"
+                  )}
                 >
-                  Offboarding
+                  {tab.label}
                 </TabsTrigger>
-              )}
+              ))}
             </TabsList>
 
             {/* ──────── PERFORMANCE TAB ──────── */}
-            <TabsContent value="performance" className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
-              {/* KPI Metrics Grid */}
+            <TabsContent value="performance" className="space-y-5 animate-in fade-in slide-in-from-right-2 duration-300 mt-0">
+              {/* KPI Grid */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <PerformanceMetric label="Rank" value="#12" icon={Award} accent="bg-gradient-to-b from-amber-400 to-amber-600" trend="+3" />
-                <PerformanceMetric label="Rating" value="96%" icon={Star} accent="bg-gradient-to-b from-blue-400 to-blue-600" progressColor="bg-blue-500" trend="+4%" />
-                <PerformanceMetric label="Efficiency" value="94%" icon={Zap} accent="bg-gradient-to-b from-emerald-400 to-emerald-600" progressColor="bg-emerald-500" trend="+5%" />
-                <PerformanceMetric label="ScoreCard" value="98%" icon={Target} accent="bg-gradient-to-b from-purple-400 to-purple-600" progressColor="bg-purple-500" />
+                {[
+                  { label: "Rank", value: "#12", icon: Award, accent: "from-amber-500 to-orange-500", trend: "+3" },
+                  { label: "Rating", value: "96%", icon: Star, accent: "from-blue-500 to-indigo-500", trend: "+4%", pct: 96, pctColor: "bg-blue-500" },
+                  { label: "Efficiency", value: "94%", icon: Zap, accent: "from-emerald-500 to-teal-500", trend: "+5%", pct: 94, pctColor: "bg-emerald-500" },
+                  { label: "ScoreCard", value: "98%", icon: Target, accent: "from-purple-500 to-violet-500", pct: 98, pctColor: "bg-purple-500" },
+                ].map((kpi) => (
+                  <div key={kpi.label} className="relative rounded-2xl border border-border/40 dark:border-white/[0.08] bg-card p-4 group hover:shadow-md transition-all overflow-hidden">
+                    <div className={cn("absolute top-0 left-0 w-1 h-full rounded-r-full bg-gradient-to-b", kpi.accent)} />
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{kpi.label}</span>
+                      <div className="p-1.5 rounded-lg bg-muted/40 dark:bg-white/[0.06]">
+                        <kpi.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="text-2xl font-black tracking-tight text-foreground leading-none">{kpi.value}</span>
+                      {kpi.trend && (
+                        <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-0.5 mb-0.5">
+                          <TrendingUp className="w-3 h-3" /> {kpi.trend}
+                        </span>
+                      )}
+                    </div>
+                    {kpi.pct && (
+                      <div className="h-1 w-full bg-muted/50 dark:bg-white/10 rounded-full overflow-hidden mt-3">
+                        <div className={cn("h-full rounded-full transition-all duration-1000 ease-out", kpi.pctColor)} style={{ width: `${kpi.pct}%` }} />
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {/* Performance Overview Cards */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Task & Hours Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Task Completion */}
-                <Card className="border border-border/50 dark:border-white/10 bg-card overflow-hidden">
-                  <CardContent className="p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Task Completion</h4>
-                      <BarChart3 className="w-4 h-4 text-muted-foreground/40" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {[
-                        { label: "Total", value: "201", color: "from-blue-500 to-indigo-500" },
-                        { label: "Completed", value: "143", color: "from-emerald-500 to-teal-500" },
-                        { label: "In Progress", value: "38", color: "from-amber-500 to-orange-500" },
-                        { label: "Pending", value: "20", color: "from-rose-500 to-pink-500" },
-                      ].map((item) => (
-                        <div key={item.label} className="p-3 rounded-xl bg-muted/20 dark:bg-white/[0.04] border border-border/30 dark:border-white/[0.06]">
-                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{item.label}</p>
-                          <div className="flex items-center gap-2">
-                            <div className={cn("w-0.5 h-6 rounded-full bg-gradient-to-b", item.color)} />
-                            <span className="text-xl font-black text-foreground leading-none">{item.value}</span>
-                          </div>
+                <div className="rounded-2xl border border-border/40 dark:border-white/[0.08] bg-card p-5">
+                  <div className="flex items-center justify-between mb-5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Task Completion</h4>
+                    <BarChart3 className="w-4 h-4 text-muted-foreground/40" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Total", value: "201", color: "bg-blue-500" },
+                      { label: "Completed", value: "143", color: "bg-emerald-500" },
+                      { label: "In Progress", value: "38", color: "bg-amber-500" },
+                      { label: "Pending", value: "20", color: "bg-rose-500" },
+                    ].map((stat) => (
+                      <div key={stat.label} className="p-3 rounded-xl bg-muted/20 dark:bg-white/[0.03] border border-border/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={cn("w-1.5 h-1.5 rounded-full", stat.color)} />
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                        <span className="text-2xl font-black text-foreground leading-none">{stat.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-                {/* Time Performance - Redesigned */}
-                <Card className="border border-zinc-200 dark:border-zinc-800 bg-card shadow-sm rounded-[32px] overflow-hidden relative group">
-                  <CardContent className="p-6 flex flex-col items-center justify-between h-full relative z-10">
-                    <div className="w-full flex items-center justify-between mb-2">
-                       <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover:text-foreground/80 transition-colors">Weekly Hours</h4>
-                       <div className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground">
-                         <Clock className="w-3.5 h-3.5" />
-                       </div>
+                {/* Weekly Hours Ring */}
+                <div className="rounded-2xl border border-border/40 dark:border-white/[0.08] bg-card p-5 flex flex-col items-center">
+                  <div className="w-full flex items-center justify-between mb-3">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Weekly Hours</h4>
+                    <Clock className="w-4 h-4 text-muted-foreground/40" />
+                  </div>
+                  
+                  <div className="relative w-36 h-36 my-2">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="42" fill="none" strokeWidth="6" className="stroke-muted/30 dark:stroke-white/10" />
+                      <circle cx="50" cy="50" r="42" fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray="264" strokeDashoffset="53" className="stroke-primary transition-all duration-1000" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl font-black text-foreground tracking-tighter leading-none">80<span className="text-lg text-muted-foreground">%</span></span>
+                      <div className="flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10">
+                        <TrendingUp className="w-2.5 h-2.5 text-emerald-500" />
+                        <span className="text-[9px] font-bold text-emerald-500">+23%</span>
+                      </div>
                     </div>
-                    
-                    {/* Main Chart */}
-                    <div className="relative w-40 h-40 my-2">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                          {/* Background Ring */}
-                          <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-zinc-100 dark:stroke-zinc-800" />
-                          {/* Progress Ring - Green #16C47F */}
-                          <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" strokeLinecap="round" strokeDasharray="264" strokeDashoffset="53" className="stroke-[#16C47F] transition-all duration-1000" />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                           <span className="text-4xl font-black text-foreground tracking-tighter">80<span className="text-xl align-top text-muted-foreground">%</span></span>
-                           <div className="flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-[#16C47F]/10">
-                              <TrendingUp className="w-3 h-3 text-[#16C47F]" />
-                              <span className="text-[10px] font-bold text-[#16C47F] uppercase tracking-wide">+23%</span>
-                           </div>
-                        </div>
-                    </div>
+                  </div>
 
-                    {/* Bottom Stats - Clean Layout */}
-                    <div className="flex items-center justify-between w-full border-t border-zinc-100 dark:border-zinc-800 pt-5 mt-2">
-                       <div className="text-center flex-1 border-r border-zinc-100 dark:border-zinc-800">
-                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">This Week</p>
-                          <p className="text-xl font-black text-foreground tracking-tight">38.5<span className="text-sm font-bold text-muted-foreground ml-0.5">h</span></p>
-                       </div>
-                       <div className="text-center flex-1">
-                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Avg/Week</p>
-                          <p className="text-xl font-black text-foreground tracking-tight">41.2<span className="text-sm font-bold text-muted-foreground ml-0.5">h</span></p>
-                       </div>
+                  <div className="flex items-center justify-between w-full border-t border-border/30 pt-4 mt-2">
+                    <div className="text-center flex-1">
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">This Week</p>
+                      <p className="text-lg font-black text-foreground">38.5<span className="text-xs font-medium text-muted-foreground ml-0.5">h</span></p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="w-px h-8 bg-border/30" />
+                    <div className="text-center flex-1">
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Avg/Week</p>
+                      <p className="text-lg font-black text-foreground">41.2<span className="text-xs font-medium text-muted-foreground ml-0.5">h</span></p>
+                    </div>
+                  </div>
+                </div>
               </div>
-
-
             </TabsContent>
 
             {/* ──────── LOGISTICS TAB ──────── */}
-            <TabsContent value="logistics" className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
-              <section className="space-y-3">
-                <div className="flex items-center gap-2.5">
+            <TabsContent value="logistics" className="space-y-5 animate-in fade-in slide-in-from-right-2 duration-300 mt-0">
+              {/* Vehicle Assignments */}
+              <div className="rounded-2xl border border-border/40 dark:border-white/[0.08] bg-card p-5">
+                <div className="flex items-center gap-2.5 mb-4">
                   <div className="p-1.5 rounded-lg bg-primary/10">
                     <Truck className="w-4 h-4 text-primary" />
                   </div>
-                  <h3 className="font-bold text-sm tracking-tight text-foreground">Vehicle Assignments</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Vehicle Assignments</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <InfoRow label="Primary Van" value={employee.defaultVan1} icon={Truck} />
-                  <InfoRow label="Backup Van 1" value={employee.defaultVan2} icon={Truck} />
-                  <InfoRow label="Backup Van 2" value={employee.defaultVan3} icon={Truck} />
+                  {[
+                    { label: "Primary Van", value: employee.defaultVan1 },
+                    { label: "Backup Van 1", value: employee.defaultVan2 },
+                    { label: "Backup Van 2", value: employee.defaultVan3 },
+                  ].map((van) => (
+                    <div key={van.label} className="p-3 rounded-xl bg-muted/20 dark:bg-white/[0.03] border border-border/20">
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{van.label}</p>
+                      <div className="flex items-center gap-2">
+                        <Truck className="w-4 h-4 text-muted-foreground/40" />
+                        <span className="text-sm font-semibold text-foreground">{van.value || <span className="text-muted-foreground/40 italic font-normal text-xs">Unassigned</span>}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </section>
+              </div>
 
-              <section className="space-y-3">
-                <div className="flex items-center gap-2.5">
+              {/* Identification & Details */}
+              <div className="rounded-2xl border border-border/40 dark:border-white/[0.08] bg-card p-5">
+                <div className="flex items-center gap-2.5 mb-4">
                   <div className="p-1.5 rounded-lg bg-primary/10">
                     <IdCard className="w-4 h-4 text-primary" />
                   </div>
-                  <h3 className="font-bold text-sm tracking-tight text-foreground">Identification & Details</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Identification & Details</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <InfoRow label="Badge #" value={employee.badgeNumber} icon={IdCard} />
-                  <InfoRow label="Transporter ID" value={employee.transporterId} icon={Briefcase} />
-                  <InfoRow label="Gas Card PIN" value={employee.gasCardPin} icon={ShieldCheck} />
-                  <InfoRow label="Routes Comp" value={employee.routesComp} icon={Building2} />
-                  <InfoRow label="DL Expiration" value={employee.dlExpiration ? format(new Date(employee.dlExpiration), "MMM dd, yyyy") : null} icon={Calendar} />
-                  <InfoRow label="MVR Date" value={employee.motorVehicleReportDate ? format(new Date(employee.motorVehicleReportDate), "MMM dd, yyyy") : null} icon={Calendar} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1">
+                  <InfoItem icon={IdCard} label="Badge #" value={employee.badgeNumber} />
+                  <InfoItem icon={Briefcase} label="Transporter ID" value={employee.transporterId} />
+                  <InfoItem icon={CreditCard} label="Gas Card PIN" value={employee.gasCardPin} />
+                  <InfoItem icon={Building2} label="Routes Comp" value={employee.routesComp} />
+                  <InfoItem icon={Calendar} label="DL Expiration" value={employee.dlExpiration ? format(new Date(employee.dlExpiration), "MMM dd, yyyy") : undefined} />
+                  <InfoItem icon={Calendar} label="MVR Date" value={employee.motorVehicleReportDate ? format(new Date(employee.motorVehicleReportDate), "MMM dd, yyyy") : undefined} />
                 </div>
-              </section>
+              </div>
             </TabsContent>
 
             {/* ──────── DOCUMENTS TAB ──────── */}
-            <TabsContent value="documents" className="pt-2 animate-in fade-in slide-in-from-right-2 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FileCard label="Offer Letter" url={employee.offerLetterFile} icon={FileText} />
-                <FileCard label="Employee Handbook" url={employee.handbookFile} icon={FileText} />
-                <FileCard label="Driver's License" url={employee.driversLicenseFile} icon={IdCard} />
-                <FileCard label="I-9 Documents" url={employee.i9File} icon={ShieldCheck} />
-                <FileCard label="Drug Test Results" url={employee.drugTestFile} icon={CheckCircle2} />
-                <FileCard label="Final Check Cleared" url={employee.finalCheck} icon={DollarSign} />
+            <TabsContent value="documents" className="animate-in fade-in slide-in-from-right-2 duration-300 mt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <FileItem label="Offer Letter" url={employee.offerLetterFile} icon={FileText} />
+                <FileItem label="Employee Handbook" url={employee.handbookFile} icon={FileText} />
+                <FileItem label="Driver's License" url={employee.driversLicenseFile} icon={IdCard} />
+                <FileItem label="I-9 Documents" url={employee.i9File} icon={ShieldCheck} />
+                <FileItem label="Drug Test Results" url={employee.drugTestFile} icon={FileCheck} />
+                <FileItem label="Final Check Cleared" url={employee.finalCheck} icon={DollarSign} />
               </div>
             </TabsContent>
 
             {/* ──────── OFFBOARDING TAB ──────── */}
-            <TabsContent value="offboarding" className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
-              <div className="p-5 rounded-2xl bg-red-500/5 dark:bg-red-500/10 border border-red-200/30 dark:border-red-500/20 flex items-start gap-4">
-                <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400">
-                  <AlertTriangle className="w-5 h-5" />
+            <TabsContent value="offboarding" className="space-y-5 animate-in fade-in slide-in-from-right-2 duration-300 mt-0">
+              {/* Warning Banner */}
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/5 dark:bg-red-500/10 border border-red-200/30 dark:border-red-500/20">
+                <div className="p-2 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 flex-shrink-0">
+                  <AlertTriangle className="w-4 h-4" />
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-bold text-red-800 dark:text-red-300 text-base">Offboarding Record</h3>
-                  <p className="text-xs text-red-600/80 dark:text-red-400/60 leading-relaxed font-medium">This profile contains sensitive termination or resignation data.</p>
+                <div>
+                  <h3 className="font-bold text-red-800 dark:text-red-300 text-sm">Offboarding Record</h3>
+                  <p className="text-xs text-red-600/70 dark:text-red-400/50 mt-0.5">This profile contains sensitive termination or resignation data.</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <section className="space-y-3">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2 px-1">
-                    <XCircle className="w-3 h-3 text-red-400" /> Termination
-                  </h4>
-                  <div className="space-y-3">
-                    <InfoRow label="Date" value={employee.terminationDate ? format(new Date(employee.terminationDate), "MMM dd, yyyy") : null} icon={Calendar} className="bg-red-500/5 dark:bg-red-500/10 border-red-200/30 dark:border-red-500/20" />
-                    <InfoRow label="Reason" value={employee.terminationReason} icon={AlertTriangle} className="bg-red-500/5 dark:bg-red-500/10 border-red-200/30 dark:border-red-500/20" />
-                    <FileCard icon={FileText} label="Termination Letter" url={employee.terminationLetter} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Termination */}
+                <div className="rounded-2xl border border-red-200/30 dark:border-red-500/15 bg-card p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <XCircle className="w-4 h-4 text-red-400" />
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Termination</h4>
                   </div>
-                </section>
+                  <InfoItem icon={Calendar} label="Date" value={employee.terminationDate ? format(new Date(employee.terminationDate), "MMM dd, yyyy") : undefined} />
+                  <InfoItem icon={AlertTriangle} label="Reason" value={employee.terminationReason} />
+                  <FileItem icon={FileText} label="Termination Letter" url={employee.terminationLetter} />
+                </div>
 
-                <section className="space-y-3">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2 px-1">
-                    <XCircle className="w-3 h-3 text-orange-400" /> Resignation
-                  </h4>
-                  <div className="space-y-3">
-                    <InfoRow label="Date" value={employee.resignationDate ? format(new Date(employee.resignationDate), "MMM dd, yyyy") : null} icon={Calendar} className="bg-orange-500/5 dark:bg-orange-500/10 border-orange-200/30 dark:border-orange-500/20" />
-                    <InfoRow label="Type" value={employee.resignationType} icon={AlertTriangle} className="bg-orange-500/5 dark:bg-orange-500/10 border-orange-200/30 dark:border-orange-500/20" />
-                    <FileCard icon={FileText} label="Resignation Letter" url={employee.resignationLetter} />
+                {/* Resignation */}
+                <div className="rounded-2xl border border-amber-200/30 dark:border-amber-500/15 bg-card p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <XCircle className="w-4 h-4 text-amber-400" />
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Resignation</h4>
                   </div>
-                </section>
+                  <InfoItem icon={Calendar} label="Date" value={employee.resignationDate ? format(new Date(employee.resignationDate), "MMM dd, yyyy") : undefined} />
+                  <InfoItem icon={AlertTriangle} label="Type" value={employee.resignationType} />
+                  <FileItem icon={FileText} label="Resignation Letter" url={employee.resignationLetter} />
+                </div>
               </div>
 
-              <section className="pt-6 border-t border-dashed border-border/50 space-y-4">
+              {/* System Status & Exit Notes */}
+              <div className="rounded-2xl border border-border/40 dark:border-white/[0.08] bg-card p-5 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InfoRow label="Last Date Worked" value={employee.lastDateWorked ? format(new Date(employee.lastDateWorked), "MMM dd, yyyy") : null} icon={Calendar} />
-                  <div className="flex flex-col gap-3 p-4 rounded-2xl bg-muted/10 dark:bg-white/[0.03] border border-dashed border-border/30 dark:border-white/[0.08]">
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest pl-1">System Status</p>
-                    <div className="flex flex-wrap gap-4">
-                      <div className="flex items-center gap-2 text-xs font-bold">
-                        {employee.paycomOffboarded ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-muted-foreground/20" />}
-                        Paycom
+                  <InfoItem icon={Calendar} label="Last Date Worked" value={employee.lastDateWorked ? format(new Date(employee.lastDateWorked), "MMM dd, yyyy") : undefined} />
+                  <div className="flex items-center gap-4">
+                    {[
+                      { label: "Paycom", done: employee.paycomOffboarded },
+                      { label: "Amazon", done: employee.amazonOffboarded },
+                      { label: "Final Check", done: employee.finalCheckIssued },
+                    ].map((sys) => (
+                      <div key={sys.label} className="flex items-center gap-1.5 text-xs font-bold">
+                        {sys.done ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-muted-foreground/20" />}
+                        {sys.label}
                       </div>
-                      <div className="flex items-center gap-2 text-xs font-bold">
-                        {employee.amazonOffboarded ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-muted-foreground/20" />}
-                        Amazon
-                      </div>
-                      <div className="flex items-center gap-2 text-xs font-bold">
-                        {employee.finalCheckIssued ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-muted-foreground/20" />}
-                        Final Check
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-2 px-1">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Separator className="bg-border/30" />
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
                     <FileText className="w-3 h-3" /> Exit Interview Notes
                   </p>
-                  <div className="p-4 rounded-2xl bg-muted/10 dark:bg-white/[0.03] border border-border/20 dark:border-white/[0.06] text-sm leading-relaxed text-foreground/80 min-h-[100px] font-medium italic">
+                  <div className="p-3 rounded-xl bg-muted/20 dark:bg-white/[0.03] border border-border/20 text-sm text-foreground/80 italic min-h-[80px]">
                     {employee.exitInterviewNotes || "No exit interview notes documented."}
                   </div>
                 </div>
-              </section>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -677,7 +596,7 @@ export default function EmployeeDetailPage(props: PageProps) {
                   setIsEditDialogOpen(false);
                   toast.success("Profile updated successfully");
                 }
-              } catch (e) {
+              } catch {
                 toast.error("Failed to update profile");
               }
             }} 
