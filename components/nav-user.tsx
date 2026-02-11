@@ -85,8 +85,8 @@ export function NavUser({
       <SidebarMenu>
         <SidebarMenuItem>
           <div className="flex items-center gap-2 p-2">
-            <Skeleton className="h-8 w-8 rounded-lg" />
-            <div className="space-y-2">
+            <Skeleton className="h-8 w-8 rounded-lg flex-shrink-0" />
+            <div className="space-y-2 group-data-[collapsible=icon]:hidden">
               <Skeleton className="h-4 w-24" />
             </div>
           </div>
@@ -106,10 +106,13 @@ export function NavUser({
               tooltip={user.name}
             >
 
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs flex-shrink-0">
+                {user.name?.charAt(0)?.toUpperCase() || "U"}
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-black uppercase tracking-tight">{user.name}</span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" />
+              <IconDotsVertical className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

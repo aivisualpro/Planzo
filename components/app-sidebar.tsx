@@ -442,7 +442,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <Layers className="size-4" />
                     )}
                   </div>
-                  <div className="grid flex-1 text-left leading-tight">
+                  <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="font-semibold text-xs leading-snug line-clamp-2">
                       {activeWorkspace?.workspaceTeam || "All Workspaces"}
                     </span>
@@ -452,7 +452,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       </span>
                     )}
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4 opacity-50" />
+                  <ChevronsUpDown className="ml-auto size-4 opacity-50 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
