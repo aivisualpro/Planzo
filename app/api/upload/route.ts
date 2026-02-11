@@ -3,26 +3,21 @@ import { v2 as cloudinary } from "cloudinary";
 import { getSession } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Configure Cloudinary — prefer CLOUDINARY_URL with individual vars as fallback
+if (!cloudinary.config().cloud_name) {
+  if (process.env.CLOUDINARY_URL) {
+    // CLOUDINARY_URL auto-configures the SDK
+  } else {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
+}
 
 // POST: General-purpose file upload to Cloudinary
 export async function POST(req: NextRequest) {
-  if (
-    !process.env.CLOUDINARY_CLOUD_NAME ||
-    !process.env.CLOUDINARY_API_KEY ||
-    !process.env.CLOUDINARY_API_SECRET
-  ) {
-    return NextResponse.json(
-      { error: "Missing Cloudinary credentials" },
-      { status: 500 }
-    );
-  }
-
   try {
     const session = await getSession();
     if (!session) {
