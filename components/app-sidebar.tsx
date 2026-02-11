@@ -123,14 +123,14 @@ const data = {
       icon: IconCalendarWeek,
     },
     {
-      name: "Reports",
-      url: "/reports",
-      icon: IconChartBar,
-    },
-    {
       name: "Audit Trail",
       url: "/audit-trail",
       icon: IconShieldCheck,
+    },
+    {
+      name: "Reports",
+      url: "/reports",
+      icon: IconChartBar,
     },
   ],
 };
