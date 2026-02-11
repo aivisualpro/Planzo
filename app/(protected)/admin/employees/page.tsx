@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SimpleDataTable } from "@/components/admin/simple-data-table";
-import { formatPhoneNumber } from "@/lib/utils";
 import { EmployeeForm } from "@/components/admin/employee-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -94,24 +93,16 @@ export default function EmployeesPage() {
     setIsDialogOpen(true);
   };
 
-  // Helper for file link cells
-  const FileLinkCell = ({ value }: { value?: string }) => {
-    if (!value) return null;
-    return (
-      <a href={value} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-        View
-      </a>
-    );
-  };
-
   const columns: ColumnDef<IEmployee>[] = [
     {
-       id: "profileImage",
+       id: "picture",
        header: "Image",
        cell: ({ row }) => (
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted overflow-hidden">
-               {row.original.profileImage ? (
-                   <img src={row.original.profileImage} alt="User" className="h-full w-full object-cover" />
+               {row.original.picture ? (
+                   <img src={row.original.picture} alt="User" className="h-full w-full object-cover" />
+               ) : row.original.initials ? (
+                   <span className="text-xs font-bold text-muted-foreground">{row.original.initials}</span>
                ) : (
                    <User className="h-5 w-5 text-muted-foreground" />
                )}
@@ -120,89 +111,22 @@ export default function EmployeesPage() {
      },
      { accessorKey: "fullName", header: "Full Name" },
      { accessorKey: "email", header: "Email" },
-    
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            row.original.status === 'Active' ? 'bg-green-100 text-green-800' : 
-            row.original.status === 'Inactive' ? 'bg-gray-100 text-gray-800' :
-            'bg-red-100 text-red-800'
-        }`}>
-            {row.original.status}
-        </span>
-      )
-    },
-    // Hidden columns by default
-    
-    { accessorKey: "streetAddress", header: "Address" },
-    { accessorKey: "city", header: "City" },
-    { accessorKey: "state", header: "State" },
-    { accessorKey: "zipCode", header: "Zip" },
-    { accessorKey: "gender", header: "Gender" },
-    { accessorKey: "dob", header: "DOB", cell: ({row}) => row.original.dob ? new Date(row.original.dob).toLocaleDateString() : "" },
-  
-
-    // Files
-    { accessorKey: "offerLetterFile", header: "Offer Letter", cell: ({row}) => <FileLinkCell value={row.original.offerLetterFile} /> },
-    { accessorKey: "handbookFile", header: "Handbook", cell: ({row}) => <FileLinkCell value={row.original.handbookFile} /> },
-    { accessorKey: "driversLicenseFile", header: "DL File", cell: ({row}) => <FileLinkCell value={row.original.driversLicenseFile} /> },
-    { accessorKey: "i9File", header: "I-9", cell: ({row}) => <FileLinkCell value={row.original.i9File} /> },
-    { accessorKey: "drugTestFile", header: "Drug Test", cell: ({row}) => <FileLinkCell value={row.original.drugTestFile} /> },
+     { accessorKey: "role", header: "Role" },
+     { accessorKey: "employeeId", header: "Employee ID" },
+     { accessorKey: "color", header: "Color", cell: ({ row }) => row.original.color ? (
+       <div className="flex items-center gap-2">
+         <div className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: row.original.color }} />
+         <span className="text-xs text-muted-foreground">{row.original.color}</span>
+       </div>
+     ) : null },
+     { accessorKey: "initials", header: "Initials" },
+     { accessorKey: "sort", header: "Sort" },
   ];
 
-  // Define initial visibility: Show key fields, hide less common ones
   const initialVisibility = {
-    // Visible by default: profileImage, firstName, lastName, email, phoneNumber, type, status, actions
-    // Also show these key fields:
-    eeCode: true,
-    rate: true,
-    eligibility: true,
-    defaultVan1: true,
-    hiredDate: true,
-    // Weekly schedule visible
-    sunday: true,
-    monday: true,
-    tuesday: true,
-    wednesday: true,
-    thursday: true,
-    friday: true,
-    saturday: true,
-    // Hidden by default:
-    transporterId: false,
-    badgeNumber: false,
-    streetAddress: false,
-    city: false,
-    state: false,
-    zipCode: false,
-    gender: false,
-    dob: false,
-    hourlyStatus: false,
-    gasCardPin: false,
-    dlExpiration: false,
-    motorVehicleReportDate: false,
-    defaultVan2: false,
-    defaultVan3: false,
-    routesComp: false,
-    ScheduleNotes: false,
-    offerLetterFile: false,
-    handbookFile: false,
-    driversLicenseFile: false,
-    i9File: false,
-    drugTestFile: false,
-    paycomOffboarded: false,
-    amazonOffboarded: false,
-    finalCheckIssued: false,
-    finalCheck: false,
-    terminationDate: false,
-    terminationReason: false,
-    terminationLetter: false,
-    resignationDate: false,
-    resignationType: false,
-    resignationLetter: false,
-    lastDateWorked: false,
-    exitInterviewNotes: false,
+    color: false,
+    initials: false,
+    sort: false,
   };
 
   return (
@@ -220,7 +144,7 @@ export default function EmployeesPage() {
       />
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingItem ? "Edit Employee" : "Add Employee"}</DialogTitle>
           </DialogHeader>

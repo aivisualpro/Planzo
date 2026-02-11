@@ -11,8 +11,8 @@ const DEFAULT_MODULES = [
   { name: "Projects", url: "/projects", icon: "IconFolderOpen", order: 2, subModules: [] },
   { name: "Approvals", url: "/approvals", icon: "IconChecklist", order: 3, subModules: [] },
   { name: "Weekly Report", url: "/weekly-report", icon: "IconCalendarWeek", order: 4, subModules: [] },
-  { name: "Reports", url: "/reports", icon: "IconChartBar", order: 5, subModules: [] },
-  { name: "Audit Trail", url: "/audit-trail", icon: "IconShieldCheck", order: 6, subModules: [] },
+  { name: "Audit Trail", url: "/audit-trail", icon: "IconShieldCheck", order: 5, subModules: [] },
+  { name: "Reports", url: "/reports", icon: "IconChartBar", order: 6, subModules: [] },
 ];
 
 // GET: Fetch all modules (ordered) — auto-seeds on first request
@@ -28,6 +28,10 @@ export async function GET() {
     // One-time cleanup: remove deprecated modules from DB
     const REMOVED_MODULES = ["Owner", "Dispatch", "Scheduling", "Everyday", "Fleet", "HR", "Incidents", "Insurance", "Manager"];
     await AppModule.deleteMany({ name: { $in: REMOVED_MODULES } });
+
+    // Force update order for Audit Trail and Reports
+    await AppModule.updateOne({ name: "Audit Trail" }, { $set: { order: 5 } });
+    await AppModule.updateOne({ name: "Reports" }, { $set: { order: 6 } });
 
     let modules = await AppModule.find({}).sort({ order: 1 }).lean();
 
@@ -55,7 +59,7 @@ export async function GET() {
             updates.subModules = defaultMod.subModules;
             needsUpdate = true;
           }
-
+          
           if (needsUpdate) {
             await AppModule.updateOne({ _id: (dbMod as any)._id }, { $set: updates });
           }
