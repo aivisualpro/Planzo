@@ -1,57 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import SymxAppModule from "@/lib/models/SymxAppModule";
-import SymxCardConfig from "@/lib/models/SymxCardConfig";
+import AppModule from "@/lib/models/AppModule";
+import CardConfig from "@/lib/models/CardConfig";
 
 // Default modules for auto-seeding
 const DEFAULT_MODULES = [
   { name: "Dashboard", url: "/dashboard", icon: "IconDashboard", order: 0, subModules: [] },
-  { name: "Owner", url: "/owner", icon: "IconCrown", order: 1, subModules: [
-    { name: "Efficiency Company", url: "#" }, { name: "Dropdowns", url: "#" }, { name: "General Settings", url: "#" },
-    { name: "Menu", url: "#" }, { name: "App Users", url: "/owner/app-users" }, { name: "Expenses", url: "#" },
-  ]},
-  { name: "Dispatch", url: "/dispatch", icon: "IconTruckDelivery", order: 2, subModules: [
-    { name: "Roster", url: "#" }, { name: "Performance Dashboard", url: "#" }, { name: "Opening", url: "#" },
-    { name: "Attendance", url: "#" }, { name: "Repairs", url: "#" }, { name: "Loadout", url: "#" },
-    { name: "Time", url: "#" }, { name: "Schedule", url: "#" }, { name: "Closing", url: "#" },
-    { name: "Contacts", url: "#" }, { name: "Verbal Coaching", url: "#" }, { name: "Messaging", url: "#" },
-    { name: "Efficiency", url: "#" }, { name: "Routes", url: "#" }, { name: "Incidents", url: "#" },
-    { name: "Coaching", url: "#" }, { name: "Checklist", url: "#" },
-  ]},
-  { name: "Scheduling", url: "/scheduling", icon: "IconCalendarTime", order: 3, subModules: [
-    { name: "Schedule", url: "#" }, { name: "Confirm Schedules", url: "#" },
-    { name: "Work Hour Compliance", url: "#" }, { name: "Capacity Planning", url: "#" },
-    { name: "Availability", url: "#" }, { name: "Schedule Check", url: "#" },
-  ]},
-  { name: "Everyday", url: "#", icon: "IconSun", order: 4, subModules: [] },
-  { name: "Fleet", url: "#", icon: "IconCar", order: 5, subModules: [] },
-  { name: "HR", url: "/hr", icon: "IconUsersGroup", order: 6, subModules: [
-    { name: "Employees", url: "/hr/employees" }, { name: "Employee Performance", url: "#" },
-    { name: "Reimbursement", url: "#" }, { name: "Claims Dashboard", url: "#" },
-    { name: "Employee Audit", url: "#" }, { name: "HR Tickets", url: "#" },
-    { name: "Timesheet", url: "#" }, { name: "Interviews", url: "#" },
-    { name: "Onboarding", url: "#" }, { name: "Hired", url: "#" },
-    { name: "Uniforms", url: "#" }, { name: "Terminations", url: "#" },
-  ]},
-  { name: "Incidents", url: "#", icon: "IconAlertTriangle", order: 7, subModules: [] },
-  { name: "Insurance", url: "#", icon: "IconShield", order: 8, subModules: [] },
-  { name: "Manager", url: "/manager", icon: "IconTie", order: 9, subModules: [
-    { name: "Routes Manager", url: "#" }, { name: "Punch Ins Manager", url: "#" },
-    { name: "Punch Ins Import", url: "#" }, { name: "RTS Manager", url: "#" },
-    { name: "Rescue Manager", url: "#" }, { name: "Driver Efficiency Manager", url: "#" },
-    { name: "Performance Summary", url: "#" }, { name: "Scorecard Performance", url: "#" },
-    { name: "Employee Ranking", url: "#" }, { name: "HR Tickets Managers", url: "#" },
-    { name: "Notices", url: "#" }, { name: "Work Hours Compliance", url: "#" },
-    { name: "Paycom Schedule Export", url: "#" }, { name: "Work Summary Tool", url: "#" },
-    { name: "Fleet Summary", url: "#" }, { name: "Repairs", url: "#" },
-    { name: "Scorecard History", url: "#" },
-    { name: "Weekly ScoreCard", url: "/reports/company-performance-dashboard" },
-    { name: "Lunch Compliance", url: "#" },
-  ]},
-  { name: "Reports", url: "/reports", icon: "IconChartBar", order: 10, subModules: [
-    { name: "Company Performance Dashboard", url: "/reports/company-performance-dashboard" },
-  ]},
+  { name: "Tasks", url: "/tasks", icon: "IconListCheck", order: 1, subModules: [] },
+  { name: "Projects", url: "/projects", icon: "IconFolderOpen", order: 2, subModules: [] },
+  { name: "Approvals", url: "/approvals", icon: "IconChecklist", order: 3, subModules: [] },
+  { name: "Weekly Report", url: "/weekly-report", icon: "IconCalendarWeek", order: 4, subModules: [] },
+  { name: "Reports", url: "/reports", icon: "IconChartBar", order: 5, subModules: [] },
+  { name: "Audit Trail", url: "/audit-trail", icon: "IconShieldCheck", order: 6, subModules: [] },
 ];
 
 // GET: Fetch all modules (ordered) — auto-seeds on first request
@@ -64,12 +25,16 @@ export async function GET() {
 
     await connectToDatabase();
 
-    let modules = await SymxAppModule.find({}).sort({ order: 1 }).lean();
+    // One-time cleanup: remove deprecated modules from DB
+    const REMOVED_MODULES = ["Owner", "Dispatch", "Scheduling", "Everyday", "Fleet", "HR", "Incidents", "Insurance", "Manager"];
+    await AppModule.deleteMany({ name: { $in: REMOVED_MODULES } });
+
+    let modules = await AppModule.find({}).sort({ order: 1 }).lean();
 
     // Auto-seed if collection is empty
     if (modules.length === 0) {
-      await SymxAppModule.insertMany(DEFAULT_MODULES);
-      modules = await SymxAppModule.find({}).sort({ order: 1 }).lean();
+      await AppModule.insertMany(DEFAULT_MODULES);
+      modules = await AppModule.find({}).sort({ order: 1 }).lean();
     } else {
       // Auto-patch: sync sub-modules/URLs from DEFAULT_MODULES for modules
       // that were seeded with empty sub-modules but now have defaults
@@ -92,19 +57,22 @@ export async function GET() {
           }
 
           if (needsUpdate) {
-            await SymxAppModule.updateOne({ _id: (dbMod as any)._id }, { $set: updates });
+            await AppModule.updateOne({ _id: (dbMod as any)._id }, { $set: updates });
           }
+        } else {
+          // Module doesn't exist in DB yet — insert it
+          await AppModule.create(defaultMod);
         }
       }
 
-      // Re-fetch if any patches were applied
-      modules = await SymxAppModule.find({}).sort({ order: 1 }).lean();
+      // Re-fetch after patches/inserts
+      modules = await AppModule.find({}).sort({ order: 1 }).lean();
     }
 
     // Merge card-config display names into sub-modules
     // Card-config is the source of truth for display names set by Super Admin
     try {
-      const cardConfigs = await SymxCardConfig.find({}).lean();
+      const cardConfigs = await CardConfig.find({}).lean();
       if (cardConfigs.length > 0) {
         modules = modules.map((mod: any) => {
           const pageName = mod.name.toLowerCase(); // e.g. "Reports" → "reports"
@@ -144,7 +112,7 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
 
-    const existingCount = await SymxAppModule.countDocuments();
+    const existingCount = await AppModule.countDocuments();
     if (existingCount > 0) {
       return NextResponse.json({ message: "Modules already seeded", count: existingCount });
     }
@@ -158,138 +126,15 @@ export async function POST(req: NextRequest) {
         subModules: [],
       },
       {
-        name: "Owner",
-        url: "/owner",
-        icon: "IconCrown",
-        order: 1,
-        subModules: [
-          { name: "Efficiency Company", url: "#" },
-          { name: "Dropdowns", url: "#" },
-          { name: "General Settings", url: "#" },
-          { name: "Menu", url: "#" },
-          { name: "App Users", url: "/owner/app-users" },
-          { name: "Expenses", url: "#" },
-        ],
-      },
-      {
-        name: "Dispatch",
-        url: "/dispatch",
-        icon: "IconTruckDelivery",
-        order: 2,
-        subModules: [
-          { name: "Roster", url: "#" },
-          { name: "Performance Dashboard", url: "#" },
-          { name: "Opening", url: "#" },
-          { name: "Attendance", url: "#" },
-          { name: "Repairs", url: "#" },
-          { name: "Loadout", url: "#" },
-          { name: "Time", url: "#" },
-          { name: "Schedule", url: "#" },
-          { name: "Closing", url: "#" },
-          { name: "Contacts", url: "#" },
-          { name: "Verbal Coaching", url: "#" },
-          { name: "Messaging", url: "#" },
-          { name: "Efficiency", url: "#" },
-          { name: "Routes", url: "#" },
-          { name: "Incidents", url: "#" },
-          { name: "Coaching", url: "#" },
-          { name: "Checklist", url: "#" },
-        ],
-      },
-      {
-        name: "Scheduling",
-        url: "#",
-        icon: "IconCalendarTime",
-        order: 3,
-        subModules: [],
-      },
-      {
-        name: "Everyday",
-        url: "#",
-        icon: "IconSun",
-        order: 4,
-        subModules: [],
-      },
-      {
-        name: "Fleet",
-        url: "#",
-        icon: "IconCar",
-        order: 5,
-        subModules: [],
-      },
-      {
-        name: "HR",
-        url: "/hr",
-        icon: "IconUsersGroup",
-        order: 6,
-        subModules: [
-          { name: "Employees", url: "/hr/employees" },
-          { name: "Employee Performance", url: "#" },
-          { name: "Reimbursement", url: "#" },
-          { name: "Claims Dashboard", url: "#" },
-          { name: "Employee Audit", url: "#" },
-          { name: "HR Tickets", url: "#" },
-          { name: "Timesheet", url: "#" },
-          { name: "Interviews", url: "#" },
-          { name: "Onboarding", url: "#" },
-          { name: "Hired", url: "#" },
-          { name: "Uniforms", url: "#" },
-          { name: "Terminations", url: "#" },
-        ],
-      },
-      {
-        name: "Incidents",
-        url: "#",
-        icon: "IconAlertTriangle",
-        order: 7,
-        subModules: [],
-      },
-      {
-        name: "Insurance",
-        url: "#",
-        icon: "IconShield",
-        order: 8,
-        subModules: [],
-      },
-      {
-        name: "Manager",
-        url: "/manager",
-        icon: "IconTie",
-        order: 9,
-        subModules: [
-          { name: "Routes Manager", url: "#" },
-          { name: "Punch Ins Manager", url: "#" },
-          { name: "Punch Ins Import", url: "#" },
-          { name: "RTS Manager", url: "#" },
-          { name: "Rescue Manager", url: "#" },
-          { name: "Driver Efficiency Manager", url: "#" },
-          { name: "Performance Summary", url: "#" },
-          { name: "Scorecard Performance", url: "#" },
-          { name: "Employee Ranking", url: "#" },
-          { name: "HR Tickets Managers", url: "#" },
-          { name: "Notices", url: "#" },
-          { name: "Work Hours Compliance", url: "#" },
-          { name: "Paycom Schedule Export", url: "#" },
-          { name: "Work Summary Tool", url: "#" },
-          { name: "Fleet Summary", url: "#" },
-          { name: "Repairs", url: "#" },
-          { name: "Scorecard History", url: "#" },
-          { name: "Weekly ScoreCard", url: "/reports/company-performance-dashboard" },
-          { name: "Lunch Compliance", url: "#" },
-        ],
-      },
-      {
         name: "Reports",
         url: "/reports",
         icon: "IconChartBar",
-        order: 10,
-        subModules: [
-          { name: "Company Performance Dashboard", url: "/reports/company-performance-dashboard" },
-        ],
+        order: 1,
+        subModules: [],
       },
     ];
 
-    await SymxAppModule.insertMany(defaultModules);
+    await AppModule.insertMany(defaultModules);
 
     return NextResponse.json({ message: "Modules seeded successfully", count: defaultModules.length });
   } catch (error) {

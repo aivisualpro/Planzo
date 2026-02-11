@@ -25,8 +25,7 @@ import { toast } from "sonner";
 const DEFAULT_DARK_IMAGE = "/images/dark-default.png";
 const DEFAULT_LIGHT_IMAGE = "/images/light-default.png";
 
-const initialReportsCards = [
-  { name: "Company Performance Dashboard", bgDark: DEFAULT_DARK_IMAGE, bgLight: DEFAULT_LIGHT_IMAGE, route: "/reports/company-performance-dashboard" },
+const initialReportsCards: { name: string; bgDark: string; bgLight: string; route: string }[] = [
 ];
 
 export default function ReportsPage() {

@@ -35,11 +35,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ISymxEmployee } from "@/lib/models/SymxEmployee";
+import { IEmployee } from "@/lib/models/Employee";
 import { cn, formatPhoneNumber } from "@/lib/utils";
 import { format, startOfWeek, addDays } from "date-fns";
 import { useHeaderActions } from "@/components/providers/header-actions-provider";
 import { EmployeeForm } from "@/components/admin/employee-form";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -147,7 +148,7 @@ const PerformanceMetric = ({ label, value, icon: Icon, accent, trend, progressCo
 export default function EmployeeDetailPage(props: PageProps) {
   const params = use(props.params);
   const router = useRouter();
-  const [employee, setEmployee] = useState<ISymxEmployee | null>(null);
+  const [employee, setEmployee] = useState<IEmployee | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { setLeftContent, setRightContent } = useHeaderActions();
@@ -157,7 +158,7 @@ export default function EmployeeDetailPage(props: PageProps) {
     
     const oldEmployee = employee;
     const updatedEmployee = { ...employee, [dayKey]: newStatus };
-    setEmployee(updatedEmployee as ISymxEmployee);
+    setEmployee(updatedEmployee as IEmployee);
     
     try {
       const response = await fetch(`/api/admin/employees/${employee._id}`, {
@@ -178,7 +179,7 @@ export default function EmployeeDetailPage(props: PageProps) {
     if (employee) {
       setLeftContent(
         <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          {employee.firstName} {employee.lastName}
+          {employee.fullName}
         </h1>
       );
 
@@ -390,7 +391,7 @@ export default function EmployeeDetailPage(props: PageProps) {
                         <div className="grid grid-cols-3 gap-2">
                            {['Sun', 'Mon', 'Tue'].map((day, idx) => {
                               const dayKey = ['sunday', 'monday', 'tuesday'][idx];
-                              const status = String(employee[dayKey as keyof ISymxEmployee] || 'OFF');
+                              const status = String(employee[dayKey as keyof IEmployee] || 'OFF');
                               const date = format(addDays(startOfWeek(new Date()), idx), "MMM d");
                               return (
                                  <AvailabilityCard key={day} day={day} date={date} status={status} dayKey={dayKey} handleStatusChange={handleStatusChange} />
@@ -401,7 +402,7 @@ export default function EmployeeDetailPage(props: PageProps) {
                         <div className="grid grid-cols-4 gap-2">
                            {['Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => {
                               const dayKey = ['wednesday', 'thursday', 'friday', 'saturday'][idx];
-                              const status = String(employee[dayKey as keyof ISymxEmployee] || 'OFF');
+                              const status = String(employee[dayKey as keyof IEmployee] || 'OFF');
                               const date = format(addDays(startOfWeek(new Date()), idx + 3), "MMM d");
                               return (
                                  <AvailabilityCard key={day} day={day} date={date} status={status} dayKey={dayKey} handleStatusChange={handleStatusChange} />
@@ -662,8 +663,8 @@ export default function EmployeeDetailPage(props: PageProps) {
             <DialogTitle>Edit Employee Profile</DialogTitle>
           </DialogHeader>
           <EmployeeForm 
-            initialData={{ ...employee, _id: String(employee._id) }} 
-            onSubmit={async (data) => {
+            employee={{ ...employee, _id: String(employee._id) }} 
+            onSave={async (data) => {
               try {
                 const res = await fetch(`/api/admin/employees/${employee._id}`, {
                   method: "PUT",
@@ -680,7 +681,6 @@ export default function EmployeeDetailPage(props: PageProps) {
                 toast.error("Failed to update profile");
               }
             }} 
-            isLoading={false} 
             onCancel={() => setIsEditDialogOpen(false)}
           />
         </DialogContent>

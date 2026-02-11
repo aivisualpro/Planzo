@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import SymxCardConfig from "@/lib/models/SymxCardConfig";
-import SymxAppModule from "@/lib/models/SymxAppModule";
+import CardConfig from "@/lib/models/CardConfig";
+import AppModule from "@/lib/models/AppModule";
 
 // GET - Fetch card configs for a page
 export async function GET(req: NextRequest) {
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
     await connectToDatabase();
 
-    const config = await SymxCardConfig.findOne({ page });
+    const config = await CardConfig.findOne({ page });
     return NextResponse.json({ cards: config?.cards || [] });
 
   } catch (error) {
@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest) {
 
     // Merge strategy: fetch existing config, then merge incoming data
     // This way we don't lose image URLs when only name changes, or vice versa
-    const existing = await SymxCardConfig.findOne({ page });
+    const existing = await CardConfig.findOne({ page });
     const existingCards = existing?.cards || [];
 
     const mergedCards = cards.map((incoming: any) => {
@@ -67,7 +67,7 @@ export async function PUT(req: NextRequest) {
       };
     });
 
-    const config = await SymxCardConfig.findOneAndUpdate(
+    const config = await CardConfig.findOneAndUpdate(
       { page },
       { 
         page,
@@ -77,14 +77,14 @@ export async function PUT(req: NextRequest) {
       { upsert: true, new: true }
     );
 
-    // ── Sync sub-module names in SymxAppModule ──────────────────────
+    // ── Sync sub-module names in AppModule ──────────────────────
     // When a card name changes, update the matching sub-module in the
     // parent module so that the sidebar, header title, and roles page
     // all reflect the new display name automatically.
     try {
       // Capitalise the page name to match module names (e.g. "reports" → "Reports")
       const moduleName = page.charAt(0).toUpperCase() + page.slice(1);
-      const parentModule = await SymxAppModule.findOne({ name: moduleName });
+      const parentModule = await AppModule.findOne({ name: moduleName });
 
       if (parentModule && parentModule.subModules?.length > 0) {
         let changed = false;

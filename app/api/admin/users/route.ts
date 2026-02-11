@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
-import SymxUser from "@/lib/models/SymxUser";
+import User from "@/lib/models/User";
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
     // Optimized fetch: Select only necessary fields and use lean()
-    const items = await SymxUser.find({}, 
+    const items = await User.find({}, 
       "name email phone AppRole designation isActive serialNo profilePicture location createdAt"
     ).lean();
     return NextResponse.json(items);
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDatabase();
     const body = await req.json();
-    const newItem = await SymxUser.create(body);
+    const newItem = await User.create(body);
     return NextResponse.json(newItem);
   } catch (error) {
     console.error("Error creating user:", error);

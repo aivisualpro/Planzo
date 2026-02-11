@@ -30,7 +30,7 @@ async function connectToDatabase() {
 
   if (!cached.promise) {
     const opts = {
-      dbName: process.env.NODE_ENV === 'development' ? 'SYMXDevelopment' : undefined,
+      dbName: process.env.NODE_ENV === 'development' ? 'PlanzoDevelopment' : undefined,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession, logout } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import SymxUser from "@/lib/models/SymxUser";
+import User from "@/lib/models/User";
 
 export async function GET() {
   const session = await getSession();
@@ -15,7 +15,7 @@ export async function GET() {
   }
 
   await connectToDatabase();
-  const user = await SymxUser.findById(session.id);
+  const user = await User.findById(session.id);
 
   if (!user || !user.isActive) {
     await logout();

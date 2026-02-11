@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
-import SymxAppRole from "@/lib/models/SymxAppRole";
+import AppRole from "@/lib/models/AppRole";
 
 export async function GET(
   req: NextRequest,
@@ -14,7 +14,7 @@ export async function GET(
     // To be safe we can await if params is a promise
     const { id } = await params;
 
-    const role = await SymxAppRole.findById(id);
+    const role = await AppRole.findById(id);
     if (!role) {
       return NextResponse.json({ error: "Role not found" }, { status: 404 });
     }
@@ -34,7 +34,7 @@ export async function PUT(
     const { id } = await params;
     const body = await req.json();
 
-    const updatedRole = await SymxAppRole.findByIdAndUpdate(
+    const updatedRole = await AppRole.findByIdAndUpdate(
       id,
       { $set: body },
       { new: true }
@@ -59,7 +59,7 @@ export async function DELETE(
     await connectToDatabase();
     const { id } = await params;
 
-    const deletedRole = await SymxAppRole.findByIdAndDelete(id);
+    const deletedRole = await AppRole.findByIdAndDelete(id);
 
     if (!deletedRole) {
       return NextResponse.json({ error: "Role not found" }, { status: 404 });

@@ -18,10 +18,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ISymxEmployee } from "@/lib/models/SymxEmployee";
+import { IEmployee } from "@/lib/models/Employee";
+
 
 export default function EmployeesPage() {
-  const [data, setData] = useState<ISymxEmployee[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -95,7 +96,7 @@ export default function EmployeesPage() {
     setIsDialogOpen(true);
   };
 
-  const openEditDialog = (item: ISymxEmployee) => {
+  const openEditDialog = (item: IEmployee) => {
     setEditingItem(item);
     setIsDialogOpen(true);
   };
@@ -110,7 +111,7 @@ export default function EmployeesPage() {
     );
   };
 
-  const columns: ColumnDef<ISymxEmployee>[] = [
+  const columns: ColumnDef<IEmployee>[] = [
     {
        id: "profileImage",
        header: "Image",

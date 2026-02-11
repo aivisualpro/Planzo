@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
-import SymxEmployee from '@/lib/models/SymxEmployee';
+import Employee from '@/lib/models/Employee';
 import { getSession } from '@/lib/auth';
 
 export async function GET(req: Request) {
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const employees = await SymxEmployee.find({})
+    const employees = await Employee.find({})
       .sort({ createdAt: -1 });
 
     return NextResponse.json(employees);
@@ -39,12 +39,12 @@ export async function POST(req: Request) {
     const body = await req.json();
     
     // Check for duplicate email
-    const existingEmployee = await SymxEmployee.findOne({ email: body.email });
+    const existingEmployee = await Employee.findOne({ email: body.email });
     if (existingEmployee) {
       return new NextResponse("Email already exists", { status: 409 });
     }
 
-    const employee = await SymxEmployee.create(body);
+    const employee = await Employee.create(body);
 
     return NextResponse.json(employee);
   } catch (error) {

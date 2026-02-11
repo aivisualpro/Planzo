@@ -63,7 +63,8 @@ const FALLBACK_MODULES: any[] = [
       { name: "Incidents" }, 
       { name: "Insurance" }, 
       { name: "Manager", subModules: ["Routes Manager", "Punch Ins Manager", "Punch Ins Import", "RTS Manager", "Rescue Manager", "Driver Efficiency Manager", "Performance Summary", "Scorecard Performance", "Employee Ranking", "HR Tickets Managers", "Notices", "Work Hours Compliance", "Paycom Schedule Export", "Work Summary Tool", "Fleet Summary", "Repairs", "Scorecard History", "Weekly ScoreCard", "Lunch Compliance"] },
-      { name: "Reports", subModules: ["Company Performance Dashboard"] },
+      { name: "Reports" },
+      { name: "Audit Trail" },
       { name: "Notifications" }, 
       { name: "Settings" }
     ] 
@@ -90,7 +91,8 @@ const MODULE_FIELDS: Record<string, string[]> = {
   Dispatch: ["Master Feed", "Schedule Board", "Driver View", "Job Tickets"],
   HR: ["Employee List", "Attendance", "Payroll", "Appraisals"],
   Manager: ["Weekly Scorecard", "Performance Tracking", "Goal Management"],
-  Reports: ["Financials", "Operational", "Inventory", "Payroll"]
+  Reports: ["Financials", "Operational", "Inventory", "Payroll"],
+  "Audit Trail": ["View Events", "Export", "Filter by Project", "Filter by User"]
 };
 
 export default function RoleDetailsPage() {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/admin", "/inventory"];
+const protectedRoutes = ["/dashboard", "/admin", "/inventory", "/administration"];
 
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -16,7 +16,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route)) || path === "/";
-  const sessionCookie = req.cookies.get("symx_session")?.value;
+  const sessionCookie = req.cookies.get("planzo_session")?.value;
 
   // If trying to access protected route without a cookie
   if (isProtectedRoute && !sessionCookie && path !== "/login") {

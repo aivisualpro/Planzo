@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import SymxUser from "@/lib/models/SymxUser";
-import SymxAppRole from "@/lib/models/SymxAppRole";
+import User from "@/lib/models/User";
+import AppRole from "@/lib/models/AppRole";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,13 +21,13 @@ export async function GET(req: NextRequest) {
     // ────────────────────────────────────────────────────────────────
     
     // 1. Get User to find their Role Name
-    const user = await SymxUser.findById(session.id).select('AppRole');
+    const user = await User.findById(session.id).select('AppRole');
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // 2. Get Role Definition
-    const role = await SymxAppRole.findOne({ name: user.AppRole });
+    const role = await AppRole.findOne({ name: user.AppRole });
     
     // If no role definition found (e.g. Super Admin might be hardcoded or legacy), handle gracefully
     // If legacy "Super Admin" exists without a doc, maybe allow all? 

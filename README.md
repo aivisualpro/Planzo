@@ -1,8 +1,8 @@
-# SYMX Systems
+# Planzo
 
 ## Overview
 
-SYMX Systems ERP Dashboard — a sleek and modern dashboard built with Next.js 16, Shadcn UI, and MongoDB. It features a responsive design with support for both light and dark modes, along with a customizable theme selector.
+Planzo — A modern task, project, and workspace management tool. Organize your work, collaborate with your team, and track progress with a sleek, responsive dashboard built with Next.js 16, Shadcn UI, and MongoDB. It features a responsive design with support for both light and dark modes, along with a customizable theme selector.
 
 ## Getting Started
 

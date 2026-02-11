@@ -1,7 +1,7 @@
-import SymxUser from './SymxUser';
-import SymxAppRole from './SymxAppRole';
+import User from './Employee';
+import AppRole from './AppRole';
 
 export {
-  SymxUser,
-  SymxAppRole,
+  User,
+  AppRole,
 };

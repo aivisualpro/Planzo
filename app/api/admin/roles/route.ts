@@ -1,18 +1,18 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
-import SymxAppRole from "@/lib/models/SymxAppRole";
+import AppRole from "@/lib/models/AppRole";
 
-import SymxUser from "@/lib/models/SymxUser";
+import User from "@/lib/models/User";
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
     // Sort items by name by default
-    const roles = await SymxAppRole.find({}).sort({ name: 1 }).lean();
+    const roles = await AppRole.find({}).sort({ name: 1 }).lean();
     
     // Aggregate user counts
-    const userCounts = await SymxUser.aggregate([
+    const userCounts = await User.aggregate([
       { $group: { _id: "$AppRole", count: { $sum: 1 } } }
     ]);
 
@@ -40,12 +40,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Check for duplicate
-    const existing = await SymxAppRole.findOne({ name: body.name });
+    const existing = await AppRole.findOne({ name: body.name });
     if (existing) {
        return NextResponse.json({ error: "Role already exists" }, { status: 409 });
     }
 
-    const newItem = await SymxAppRole.create(body);
+    const newItem = await AppRole.create(body);
     return NextResponse.json(newItem);
   } catch (error) {
     console.error("Error creating role:", error);

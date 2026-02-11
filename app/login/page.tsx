@@ -134,11 +134,11 @@ export default function LoginPage() {
           <div className="relative group overflow-hidden px-4 py-2">
             <div className="relative">
               <Image
-                src="/symx-logo.png"
-                alt="SYMX Logistics"
-                width={280}
-                height={80}
-                className="relative object-contain transition-transform duration-700 hover:scale-[1.03] animate-logo-reveal drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                src="/planzo-logo.png"
+                alt="Planzo"
+                width={350}
+                height={120}
+                className="relative object-contain transition-transform duration-700 hover:scale-[1.03] animate-logo-reveal drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                 priority
               />
               {/* Shimmer overlay */}
@@ -148,7 +148,7 @@ export default function LoginPage() {
           
           <div className="flex flex-col items-center">
             {/* Divider line with animation */}
-            <div className={`mt-6 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent transition-all duration-1000 delay-1000 ${mounted ? 'opacity-100 w-24' : 'opacity-0 w-0'}`} />
+            <div className={`mt-6 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent transition-all duration-1000 delay-1000 ${mounted ? 'opacity-100 w-24' : 'opacity-0 w-0'}`} />
             
             <h1 className={`mt-5 text-xl font-medium tracking-widest text-white text-center uppercase transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-95 blur-sm'}`}>
               {isForgotMode ? "Recover Password" : "Welcome Back"}
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="name@symxlogistics.com"
+                    placeholder="name@planzo.app"
                     className="login-input pl-11"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -222,7 +222,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="name@symxlogistics.com"
+                    placeholder="name@planzo.app"
                     className="login-input pl-11"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -295,7 +295,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <footer className={`absolute bottom-6 text-white/50 text-[10px] uppercase tracking-[0.2em] font-medium z-10 transition-all duration-1000 delay-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
-        © {new Date().getFullYear()} SYMX Systems. All rights reserved.
+        © {new Date().getFullYear()} Planzo. All rights reserved.
       </footer>
 
       <style jsx global>{`
@@ -359,9 +359,9 @@ export default function LoginPage() {
           inset: 0;
           background: linear-gradient(
             135deg,
-            rgba(2, 6, 18, 0.75) 0%,
-            rgba(5, 15, 40, 0.6) 40%,
-            rgba(10, 20, 50, 0.7) 100%
+            rgba(2, 6, 23, 0.65) 0%,
+            rgba(5, 12, 35, 0.5) 40%,
+            rgba(3, 10, 40, 0.6) 100%
           );
           pointer-events: none;
         }
@@ -377,7 +377,7 @@ export default function LoginPage() {
         .login-particle {
           position: absolute;
           bottom: -10px;
-          background: rgba(120, 180, 255, 0.5);
+          background: rgba(59, 83, 184, 0.6);
           border-radius: 50%;
           animation: particleRise linear infinite;
         }
@@ -401,16 +401,16 @@ export default function LoginPage() {
 
         /* ── Card ── */
         .login-card {
-          background: linear-gradient(135deg, rgba(5, 12, 30, 0.85) 0%, rgba(8, 18, 45, 0.9) 100%);
+          background: linear-gradient(135deg, rgba(5, 10, 30, 0.88) 0%, rgba(8, 15, 45, 0.92) 100%);
           backdrop-filter: blur(50px) saturate(1.2);
           -webkit-backdrop-filter: blur(50px) saturate(1.2);
-          border: 1px solid rgba(100, 160, 255, 0.1);
+          border: 1px solid rgba(59, 83, 184, 0.2);
           padding: 32px;
           border-radius: 20px;
           box-shadow: 
             0 0 0 1px rgba(255, 255, 255, 0.04) inset,
             0 25px 60px -15px rgba(0, 0, 0, 0.6),
-            0 0 100px -25px rgba(37, 99, 235, 0.15);
+            0 0 100px -25px rgba(59, 83, 184, 0.2);
         }
 
         /* ── Input ── */
@@ -424,8 +424,8 @@ export default function LoginPage() {
           transition: all 0.3s ease !important;
         }
         .login-input:focus {
-          border-color: rgba(59, 130, 246, 0.5) !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 0 20px -5px rgba(59, 130, 246, 0.2) !important;
+          border-color: rgba(59, 83, 184, 0.6) !important;
+          box-shadow: 0 0 0 3px rgba(59, 83, 184, 0.15), 0 0 20px -5px rgba(59, 83, 184, 0.25) !important;
           background: rgba(255, 255, 255, 0.07) !important;
         }
         .login-input::placeholder {
@@ -436,7 +436,7 @@ export default function LoginPage() {
         .login-button {
           width: 100%;
           height: 48px;
-          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+          background: linear-gradient(135deg, #3B53B8 0%, #4A6CF7 100%) !important;
           color: white !important;
           font-weight: 600 !important;
           font-size: 13px !important;
@@ -445,13 +445,13 @@ export default function LoginPage() {
           border-radius: 12px !important;
           border: none !important;
           transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-          box-shadow: 0 4px 15px -3px rgba(37, 99, 235, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.2) inset !important;
+          box-shadow: 0 4px 15px -3px rgba(59, 83, 184, 0.5), 0 0 0 1px rgba(59, 83, 184, 0.3) inset !important;
           cursor: pointer;
         }
         .login-button:hover:not(:disabled) {
           transform: translateY(-1px) !important;
-          box-shadow: 0 8px 25px -5px rgba(37, 99, 235, 0.5), 0 0 0 1px rgba(59, 130, 246, 0.3) inset !important;
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+          box-shadow: 0 8px 25px -5px rgba(59, 83, 184, 0.6), 0 0 0 1px rgba(74, 108, 247, 0.4) inset !important;
+          background: linear-gradient(135deg, #4A6CF7 0%, #5B7EFF 100%) !important;
         }
         .login-button:active:not(:disabled) {
           transform: translateY(0) scale(0.98) !important;

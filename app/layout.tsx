@@ -18,9 +18,13 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "SYMX Systems",
+  title: "Planzo",
   description:
-    "A fully responsive analytics dashboard featuring dynamic charts, interactive tables, a collapsible sidebar, and a light/dark mode theme switcher. Built with modern web technologies, it ensures seamless performance across devices, offering an intuitive user interface for data visualization and exploration.",
+    "Planzo — A modern task, project, and workspace management tool. Organize your work, collaborate with your team, and track progress with a sleek, responsive dashboard built with Next.js, Shadcn UI, and MongoDB.",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default async function RootLayout({

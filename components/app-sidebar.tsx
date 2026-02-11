@@ -13,17 +13,15 @@ import {
   IconSettings,
   IconUser,
   IconUsers,
-  IconCrown,
-  IconTruckDelivery,
-  IconCalendarTime,
-  IconSun,
-  IconCar,
-  IconUsersGroup,
-  IconAlertTriangle,
-  IconShield,
-  IconTie,
   IconChartBar,
+  IconShieldCheck,
+  IconListCheck,
+  IconFolderOpen,
+  IconChecklist,
+  IconCalendarWeek,
+  IconLayoutDashboard,
 } from "@tabler/icons-react";
+import { ChevronsUpDown, Check, Layers } from "lucide-react";
 
 import { NavDocuments } from "@/components/nav-documents";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -38,7 +36,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -51,15 +58,6 @@ import { cn } from "@/lib/utils";
 // ── Icon Map: resolves DB string names to actual icon components ────────
 const ICON_MAP: Record<string, any> = {
   IconDashboard,
-  IconCrown,
-  IconTruckDelivery,
-  IconCalendarTime,
-  IconSun,
-  IconCar,
-  IconUsersGroup,
-  IconAlertTriangle,
-  IconShield,
-  IconTie,
   IconChartBar,
   IconBell,
   IconSettings,
@@ -67,6 +65,11 @@ const ICON_MAP: Record<string, any> = {
   IconBriefcase,
   IconUser,
   IconUsers,
+  IconShieldCheck,
+  IconListCheck,
+  IconFolderOpen,
+  IconChecklist,
+  IconCalendarWeek,
 };
 
 const data = {
@@ -100,130 +103,57 @@ const data = {
       icon: IconDashboard,
     },
     {
-      name: "Owner",
-      url: "/owner",
-      icon: IconCrown,
-      subModules: [
-        { name: "Efficiency Company", url: "#" }, 
-        { name: "Dropdowns", url: "#" }, 
-        { name: "General Settings", url: "#" }, 
-        { name: "Menu", url: "#" }, 
-        { name: "App Users", url: "/owner/app-users" }, 
-        { name: "Expenses", url: "#" }
-      ]
+      name: "Tasks",
+      url: "/tasks",
+      icon: IconListCheck,
     },
     {
-      name: "Dispatch",
-      url: "/dispatch",
-      icon: IconTruckDelivery,
-      subModules: [
-        { name: "Roster", url: "#" }, 
-        { name: "Performance Dashboard", url: "#" }, 
-        { name: "Opening", url: "#" }, 
-        { name: "Attendance", url: "#" }, 
-        { name: "Repairs", url: "#" }, 
-        { name: "Loadout", url: "#" }, 
-        { name: "Time", url: "#" }, 
-        { name: "Schedule", url: "#" }, 
-        { name: "Closing", url: "#" }, 
-        { name: "Contacts", url: "#" }, 
-        { name: "Verbal Coaching", url: "#" }, 
-        { name: "Messaging", url: "#" }, 
-        { name: "Efficiency", url: "#" }, 
-        { name: "Routes", url: "#" }, 
-        { name: "Incidents", url: "#" }, 
-        { name: "Coaching", url: "#" }, 
-        { name: "Checklist", url: "#" }
-      ]
+      name: "Projects",
+      url: "/projects",
+      icon: IconFolderOpen,
     },
     {
-      name: "Scheduling",
-      url: "/scheduling",
-      icon: IconCalendarTime,
-      subModules: [
-        { name: "Schedule", url: "#" },
-        { name: "Confirm Schedules", url: "#" },
-        { name: "Work Hour Compliance", url: "#" },
-        { name: "Capacity Planning", url: "#" },
-        { name: "Availability", url: "#" },
-        { name: "Schedule Check", url: "#" },
-      ],
+      name: "Approvals",
+      url: "/approvals",
+      icon: IconChecklist,
     },
     {
-      name: "Everyday",
-      url: "#",
-      icon: IconSun,
-    },
-    {
-      name: "Fleet",
-      url: "#",
-      icon: IconCar,
-    },
-    {
-      name: "HR",
-      url: "/hr",
-      icon: IconUsersGroup,
-      subModules: [
-        { name: "Employees", url: "/hr/employees" }, 
-        { name: "Employee Performance", url: "#" }, 
-        { name: "Reimbursement", url: "#" }, 
-        { name: "Claims Dashboard", url: "#" }, 
-        { name: "Employee Audit", url: "#" }, 
-        { name: "HR Tickets", url: "#" }, 
-        { name: "Timesheet", url: "#" }, 
-        { name: "Interviews", url: "#" }, 
-        { name: "Onboarding", url: "#" }, 
-        { name: "Hired", url: "#" }, 
-        { name: "Uniforms", url: "#" }, 
-        { name: "Terminations", url: "#" }
-      ]
-    },
-    {
-      name: "Incidents",
-      url: "#",
-      icon: IconAlertTriangle,
-    },
-    {
-      name: "Insurance",
-      url: "#",
-      icon: IconShield,
-    },
-    {
-      name: "Manager",
-      url: "/manager",
-      icon: IconTie,
-      subModules: [
-        { name: "Routes Manager", url: "#" }, 
-        { name: "Punch Ins Manager", url: "#" }, 
-        { name: "Punch Ins Import", url: "#" }, 
-        { name: "RTS Manager", url: "#" }, 
-        { name: "Rescue Manager", url: "#" }, 
-        { name: "Driver Efficiency Manager", url: "#" }, 
-        { name: "Performance Summary", url: "#" }, 
-        { name: "Scorecard Performance", url: "#" }, 
-        { name: "Employee Ranking", url: "#" }, 
-        { name: "HR Tickets Managers", url: "#" }, 
-        { name: "Notices", url: "#" }, 
-        { name: "Work Hours Compliance", url: "#" }, 
-        { name: "Paycom Schedule Export", url: "#" }, 
-        { name: "Work Summary Tool", url: "#" }, 
-        { name: "Fleet Summary", url: "#" }, 
-        { name: "Repairs", url: "#" }, 
-        { name: "Scorecard History", url: "#" }, 
-        { name: "Weekly ScoreCard", url: "/reports/company-performance-dashboard" }, 
-        { name: "Lunch Compliance", url: "#" }
-      ]
+      name: "Weekly Report",
+      url: "/weekly-report",
+      icon: IconCalendarWeek,
     },
     {
       name: "Reports",
       url: "/reports",
       icon: IconChartBar,
-      subModules: [
-        { name: "Company Performance Dashboard", url: "/reports/company-performance-dashboard" }
-      ]
+    },
+    {
+      name: "Audit Trail",
+      url: "/audit-trail",
+      icon: IconShieldCheck,
     },
   ],
 };
+
+// ── Color palette for workspace dots ────────────────────────────────
+const WORKSPACE_COLORS: Record<string, string> = {
+  blue: "bg-blue-500",
+  red: "bg-red-500",
+  green: "bg-emerald-500",
+  purple: "bg-purple-500",
+  orange: "bg-orange-500",
+  pink: "bg-pink-500",
+  yellow: "bg-yellow-500",
+  cyan: "bg-cyan-500",
+  indigo: "bg-indigo-500",
+};
+
+function getWorkspaceColor(colorType?: string) {
+  if (colorType && WORKSPACE_COLORS[colorType.toLowerCase()]) {
+    return WORKSPACE_COLORS[colorType.toLowerCase()];
+  }
+  return "bg-primary";
+}
 
 // Global cache for sidebar data to prevent refetching on navigation
 let sidebarCache: {
@@ -242,7 +172,46 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [dynamicModules, setDynamicModules] = React.useState<any[] | null>(null);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [workspaces, setWorkspaces] = React.useState<any[]>([]);
+  const [activeWorkspace, setActiveWorkspace] = React.useState<any>(null);
   const router = useRouter();
+
+  // ── Fetch workspaces ──────────────────────────────────────────────
+  React.useEffect(() => {
+    const fetchWorkspaces = async () => {
+      try {
+        const res = await fetch("/api/workspaces");
+        if (res.ok) {
+          const data = await res.json();
+          setWorkspaces(data.workspaces || []);
+
+          // Restore last selected workspace from localStorage
+          const savedId = localStorage.getItem("planzo_active_workspace");
+          const saved = (data.workspaces || []).find((w: any) => w.workspaceId === savedId);
+          if (saved) {
+            setActiveWorkspace(saved);
+          } else if (data.workspaces?.length > 0) {
+            setActiveWorkspace(data.workspaces[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch workspaces", err);
+      }
+    };
+    fetchWorkspaces();
+  }, []);
+
+  const selectWorkspace = (workspace: any) => {
+    setActiveWorkspace(workspace);
+    localStorage.setItem("planzo_active_workspace", workspace.workspaceId);
+    window.dispatchEvent(new Event("workspace-changed"));
+  };
+
+  const selectAllWorkspaces = () => {
+    setActiveWorkspace(null);
+    localStorage.setItem("planzo_active_workspace", "all");
+    window.dispatchEvent(new Event("workspace-changed"));
+  };
 
   const handleSearchClick = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -429,7 +398,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                    <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse-slow" />
                    <Image
                     src="/sidebar-icon.png"
-                    alt="SYMX"
+                    alt="Planzo"
                     width={40}
                     height={40}
                     className="relative object-contain w-9 h-9 transition-transform duration-700 ease-in-out hover:rotate-[360deg] hover:scale-110"
@@ -439,8 +408,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 
                 {/* Text Label - Hidden in collapsed mode */}
                 <div className="flex flex-col group-data-[collapsible=icon]:hidden opacity-100 group-data-[collapsible=icon]:opacity-0 transition-opacity duration-300">
-                  <span className="font-bold text-base tracking-wide text-foreground leading-none">SYMX</span>
-                  <span className="text-[10px] font-medium text-muted-foreground tracking-wider uppercase leading-none mt-1">Systems</span>
+                  <span className="font-bold text-base tracking-wide text-foreground leading-none">Planzo</span>
+                  <span className="text-[10px] font-medium text-muted-foreground tracking-wider uppercase leading-none mt-1">Workspace</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -448,8 +417,132 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
 
       </SidebarHeader>
+
+      {/* ── Workspace Selector ─────────────────────────────────────── */}
+      <SidebarGroup className="p-2 group-data-[collapsible=icon]:p-1">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+                  tooltip={activeWorkspace?.workspaceTeam || "Select Workspace"}
+                >
+                  {/* Workspace color indicator */}
+                  <div className={cn(
+                    "flex aspect-square size-8 items-center justify-center rounded-lg text-white",
+                    activeWorkspace ? getWorkspaceColor(activeWorkspace.colorType) : "bg-muted"
+                  )}>
+                    {activeWorkspace ? (
+                      <span className="text-xs font-bold">
+                        {activeWorkspace.workspaceTeam?.charAt(0)?.toUpperCase() || "W"}
+                      </span>
+                    ) : (
+                      <Layers className="size-4" />
+                    )}
+                  </div>
+                  <div className="grid flex-1 text-left leading-tight">
+                    <span className="font-semibold text-xs leading-snug line-clamp-2">
+                      {activeWorkspace?.workspaceTeam || "All Workspaces"}
+                    </span>
+                    {activeWorkspace?.workspaceDescription && (
+                      <span className="text-[10px] text-muted-foreground leading-snug line-clamp-1">
+                        {activeWorkspace.workspaceDescription}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4 opacity-50" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="start"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  Workspaces
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {workspaces.length === 0 ? (
+                  <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                    No workspaces found
+                  </div>
+                ) : (
+                  <>
+                    {/* All Workspaces option */}
+                    <DropdownMenuItem
+                      onClick={selectAllWorkspaces}
+                      className="gap-3 p-2 cursor-pointer"
+                    >
+                      <div className={cn(
+                        "flex size-6 items-center justify-center rounded-md border text-xs font-bold",
+                        !activeWorkspace ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                      )}>
+                        <Layers className="size-3.5" />
+                      </div>
+                      <div className="flex-1 text-xs">All Workspaces</div>
+                      {!activeWorkspace && (
+                        <Check className="size-4 text-primary" />
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {workspaces.map((ws: any) => (
+                      <DropdownMenuItem
+                        key={ws.workspaceId}
+                        onClick={() => selectWorkspace(ws)}
+                        className="gap-3 p-2 cursor-pointer"
+                      >
+                        <div className={cn(
+                          "flex size-6 items-center justify-center rounded-md border text-xs font-bold text-white",
+                          getWorkspaceColor(ws.colorType)
+                        )}>
+                          {ws.workspaceTeam?.charAt(0)?.toUpperCase() || "W"}
+                        </div>
+                        <div className="flex-1 text-xs leading-snug">{ws.workspaceTeam}</div>
+                        {activeWorkspace?.workspaceId === ws.workspaceId && (
+                          <Check className="size-4 text-primary" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+
+      <SidebarSeparator />
+
       <SidebarContent>
         {filteredAdmin.length > 0 && <NavDocuments items={filteredAdmin} />}
+
+        {/* ── Administration Section (Admin-only) ── */}
+        {isAdmin && (
+          <>
+            <SidebarSeparator />
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip="Administration"
+                    >
+                      <Link href="/administration" className="flex items-center gap-2">
+                        <IconLayoutDashboard />
+                        <span>Administration</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
+
         {filteredSecondary.length > 0 && <NavSecondary items={filteredSecondary as any} className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>
@@ -531,7 +624,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <span className="flex items-center gap-1"><kbd className="bg-background border rounded px-1 group-hover:bg-muted">↑↓</kbd> to navigate</span>
                 <span className="flex items-center gap-1"><kbd className="bg-background border rounded px-1 group-hover:bg-muted">↵</kbd> to select</span>
              </div>
-             <span>SYMX Search</span>
+             <span>Planzo Search</span>
           </div>
         </DialogContent>
       </Dialog>

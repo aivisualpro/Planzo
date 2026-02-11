@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { login } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
-import SymxUser from "@/lib/models/SymxUser";
+import User from "@/lib/models/User";
 
 export async function POST(request: Request) {
   console.log("[Auth API] Login request received");
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const dbEnd = Date.now();
     console.log(`[Auth API] DB Connection took: ${dbEnd - start}ms`);
     
-    const user = await SymxUser.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() });
     const userEnd = Date.now();
     console.log(`[Auth API] User Lookup took: ${userEnd - dbEnd}ms`);
 

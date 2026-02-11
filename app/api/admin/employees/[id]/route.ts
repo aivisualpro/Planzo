@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import SymxEmployee from "@/lib/models/SymxEmployee";
+import Employee from "@/lib/models/Employee";
 
 type RouteProps = {
   params: Promise<{ id: string }>;
@@ -24,7 +24,7 @@ export async function GET(
 
     const params = await props.params;
 
-    const employee = await SymxEmployee.findById(params.id);
+    const employee = await Employee.findById(params.id);
     if (!employee) {
       return new NextResponse("Employee not found", { status: 404 });
     }
@@ -55,7 +55,7 @@ export async function PUT(
     // Remove _id from body if present to avoid immutable field error (though mongoose handles it usually)
     delete body._id;
 
-    const updatedEmployee = await SymxEmployee.findByIdAndUpdate(
+    const updatedEmployee = await Employee.findByIdAndUpdate(
       params.id,
       body,
       { new: true, runValidators: true }
@@ -88,7 +88,7 @@ export async function DELETE(
 
     const params = await props.params;
 
-    const deletedEmployee = await SymxEmployee.findByIdAndDelete(params.id);
+    const deletedEmployee = await Employee.findByIdAndDelete(params.id);
 
     if (!deletedEmployee) {
       return new NextResponse("Employee not found", { status: 404 });

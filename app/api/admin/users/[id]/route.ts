@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
-import SymxUser from "@/lib/models/SymxUser";
+import User from "@/lib/models/User";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     await connectToDatabase();
-    const item = await SymxUser.findById(id);
+    const item = await User.findById(id);
     if (!item) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
@@ -22,7 +22,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     await connectToDatabase();
     const body = await req.json();
-    const updatedItem = await SymxUser.findByIdAndUpdate(id, body, { new: true });
+    const updatedItem = await User.findByIdAndUpdate(id, body, { new: true });
     if (!updatedItem) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
@@ -37,7 +37,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const { id } = await params;
     await connectToDatabase();
-    const deletedItem = await SymxUser.findByIdAndDelete(id);
+    const deletedItem = await User.findByIdAndDelete(id);
     if (!deletedItem) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }

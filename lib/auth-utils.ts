@@ -1,6 +1,6 @@
 import { jwtVerify } from "jose";
 
-export const secretKey = process.env.JWT_SECRET || "symx_systems_secret_key";
+export const secretKey = process.env.JWT_SECRET || "planzo_secret_key";
 export const key = new TextEncoder().encode(secretKey);
 
 export async function decrypt(input: string): Promise<any> {
