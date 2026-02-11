@@ -125,10 +125,9 @@ export default function EmployeesPage() {
                )}
           </div>
        ),
-    },
-    { accessorKey: "firstName", header: "First Name" },
-    { accessorKey: "lastName", header: "Last Name" },
-    { accessorKey: "email", header: "Email" },
+     },
+     { accessorKey: "fullName", header: "Full Name" },
+     { accessorKey: "email", header: "Email" },
     { 
       accessorKey: "phoneNumber", 
       header: "Phone",
@@ -149,35 +148,14 @@ export default function EmployeesPage() {
       )
     },
     // Hidden columns by default
-    { accessorKey: "eeCode", header: "EE Code" },
-    { accessorKey: "transporterId", header: "Transporter ID" },
-    { accessorKey: "badgeNumber", header: "Badge #" },
+    
     { accessorKey: "streetAddress", header: "Address" },
     { accessorKey: "city", header: "City" },
     { accessorKey: "state", header: "State" },
     { accessorKey: "zipCode", header: "Zip" },
     { accessorKey: "gender", header: "Gender" },
-    { accessorKey: "hiredDate", header: "Hired Date", cell: ({row}) => (row.original as any).hiredDate ? new Date((row.original as any).hiredDate).toLocaleDateString() : "" },
     { accessorKey: "dob", header: "DOB", cell: ({row}) => row.original.dob ? new Date(row.original.dob).toLocaleDateString() : "" },
-    { accessorKey: "hourlyStatus", header: "Hourly Status" },
-    { accessorKey: "rate", header: "Rate" },
-    { accessorKey: "gasCardPin", header: "Gas Card PIN" },
-    { accessorKey: "dlExpiration", header: "DL Exp", cell: ({row}) => row.original.dlExpiration ? new Date(row.original.dlExpiration).toLocaleDateString() : "" },
-    { accessorKey: "motorVehicleReportDate", header: "MVR Date", cell: ({row}) => row.original.motorVehicleReportDate ? new Date(row.original.motorVehicleReportDate).toLocaleDateString() : "" },
-    { accessorKey: "defaultVan1", header: "Van 1" },
-    { accessorKey: "defaultVan2", header: "Van 2" },
-    { accessorKey: "defaultVan3", header: "Van 3" },
-    { accessorKey: "routesComp", header: "Routes Comp" },
-    { accessorKey: "ScheduleNotes", header: "Schedule Notes" },
-    
-    // Availability
-    { accessorKey: "sunday", header: "Sun", cell: ({row}) => row.original.sunday || "OFF" },
-    { accessorKey: "monday", header: "Mon", cell: ({row}) => row.original.monday || "OFF" },
-    { accessorKey: "tuesday", header: "Tue", cell: ({row}) => row.original.tuesday || "OFF" },
-    { accessorKey: "wednesday", header: "Wed", cell: ({row}) => row.original.wednesday || "OFF" },
-    { accessorKey: "thursday", header: "Thu", cell: ({row}) => row.original.thursday || "OFF" },
-    { accessorKey: "friday", header: "Fri", cell: ({row}) => row.original.friday || "OFF" },
-    { accessorKey: "saturday", header: "Sat", cell: ({row}) => row.original.saturday || "OFF" },
+  
 
     // Files
     { accessorKey: "offerLetterFile", header: "Offer Letter", cell: ({row}) => <FileLinkCell value={row.original.offerLetterFile} /> },
@@ -186,20 +164,7 @@ export default function EmployeesPage() {
     { accessorKey: "i9File", header: "I-9", cell: ({row}) => <FileLinkCell value={row.original.i9File} /> },
     { accessorKey: "drugTestFile", header: "Drug Test", cell: ({row}) => <FileLinkCell value={row.original.drugTestFile} /> },
 
-    // Offboarding
-    { accessorKey: "paycomOffboarded", header: "Paycom Off", cell: ({row}) => row.original.paycomOffboarded ? "Yes" : "No" },
-    { accessorKey: "amazonOffboarded", header: "Amazon Off", cell: ({row}) => row.original.amazonOffboarded ? "Yes" : "No" },
-    { accessorKey: "finalCheckIssued", header: "Final Check Issued", cell: ({row}) => row.original.finalCheckIssued ? "Yes" : "No" },
-    { accessorKey: "finalCheck", header: "Final Check Cleared", cell: ({row}) => <FileLinkCell value={row.original.finalCheck} /> },
-    { accessorKey: "terminationDate", header: "Term Date", cell: ({row}) => row.original.terminationDate ? new Date(row.original.terminationDate).toLocaleDateString() : "" },
-    { accessorKey: "terminationReason", header: "Term Reason" },
-    { accessorKey: "terminationLetter", header: "Term Letter", cell: ({row}) => <FileLinkCell value={row.original.terminationLetter} /> },
-    { accessorKey: "resignationDate", header: "Resign Date", cell: ({row}) => row.original.resignationDate ? new Date(row.original.resignationDate).toLocaleDateString() : "" },
-    { accessorKey: "resignationType", header: "Resign Type" },
-    { accessorKey: "resignationLetter", header: "Resign Letter", cell: ({row}) => <FileLinkCell value={row.original.resignationLetter} /> },
-    { accessorKey: "eligibility", header: "Eligibility", cell: ({row}) => row.original.eligibility ? "Yes" : "No" },
-    { accessorKey: "lastDateWorked", header: "Last Worked", cell: ({row}) => row.original.lastDateWorked ? new Date(row.original.lastDateWorked).toLocaleDateString() : "" },
-    { accessorKey: "exitInterviewNotes", header: "Exit Notes" },
+    
     
     {
       id: "actions",
