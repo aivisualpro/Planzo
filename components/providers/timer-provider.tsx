@@ -39,11 +39,14 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch("/api/timer");
         if (res.ok) {
           const data = await res.json();
-          if (data.activeTimer) {
-             setActiveTimer({
-                ...data.activeTimer,
-                startTime: new Date(data.activeTimer.startTime)
-             });
+          if (data.activeTimer && data.activeTimer.taskId && data.activeTimer.startTime) {
+             const parsedStart = new Date(data.activeTimer.startTime);
+             if (!isNaN(parsedStart.getTime())) {
+               setActiveTimer({
+                  ...data.activeTimer,
+                  startTime: parsedStart,
+               });
+             }
           }
         }
       } catch (err) {

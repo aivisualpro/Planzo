@@ -19,7 +19,9 @@ export async function GET() {
       return NextResponse.json({ activeTimer: null });
     }
 
-    return NextResponse.json({ activeTimer: employee.activeTaskTimer || null });
+    const timer = employee.activeTaskTimer;
+    // Only return timer if it has actual data (taskId), not just an empty subdocument
+    return NextResponse.json({ activeTimer: timer?.taskId ? timer : null });
   } catch (error) {
     console.error("Error fetching active timer:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
