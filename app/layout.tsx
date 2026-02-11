@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ActiveThemeProvider } from "@/components/active-theme";
+import { TimerProvider } from "@/components/providers/timer-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 import { Poppins } from "next/font/google";
@@ -61,8 +62,10 @@ export default async function RootLayout({
           enableColorScheme
         >
           <ActiveThemeProvider initialTheme={activeThemeValue}>
-            {children}
-            <Toaster position="top-center" richColors />
+            <TimerProvider>
+              {children}
+              <Toaster position="top-center" richColors />
+            </TimerProvider>
           </ActiveThemeProvider>
         </ThemeProvider>
       </body>

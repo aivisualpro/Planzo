@@ -5,6 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Utility to ensure clean class names merge
+
 export function formatPhoneNumber(value: string) {
   if (!value) return value;
   const phoneNumber = value.replace(/[^\d]/g, '');

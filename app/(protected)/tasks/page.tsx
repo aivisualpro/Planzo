@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Card, CardContent, CardHeader, CardTitle,
 } from "@/components/ui/card";
@@ -29,11 +29,12 @@ import {
   ChevronLeft, ChevronRight, MoreHorizontal, Ban, CheckCircle2,
   Clock, AlertTriangle, Flag, Star, ArrowUpRight,
   GripVertical, MessageSquare, Link2, SlidersHorizontal, X,
-  Paperclip, ListChecks, Timer, Trash2, Upload, FileIcon, ImageIcon,
+  Paperclip, ListChecks, Timer, Trash2, Upload, FileIcon, ImageIcon, StopCircle,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useHeaderActions } from "@/components/providers/header-actions-provider";
+import { useTimer } from "@/components/providers/timer-provider";
 
 // ── Status & Priority Config ──────────────────────────────────────
 const STATUSES = ["Not Started", "In Progress", "For Review", "Blocked", "Completed"];
@@ -86,8 +87,21 @@ function KanbanCard({ task, onClick, nameMap = {}, onAttachmentClick, onSubtaskC
   const attachmentCount = (task.attachments?.length || 0);
   const subtaskCount = task.subtaskCount || 0;
   const subtaskCompleted = task.subtaskCompletedCount || 0;
-  const timeLogged = task.timeLogged || 0;
+  const timeLogged = task.timeLogged || 0.0;
   const estimatedHours = task.estimatedHours || 0;
+  const { activeTimer, startTimer, stopTimer, loading: timerLoading } = useTimer();
+  const isTimerActive = activeTimer?.taskId === task.taskId;
+
+  const handleTimerClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (timerLoading) return;
+    
+    if (isTimerActive) {
+      await stopTimer();
+    } else {
+      await startTimer(task.taskId, task.taskName);
+    }
+  };
 
   return (
     <div
@@ -150,13 +164,31 @@ function KanbanCard({ task, onClick, nameMap = {}, onAttachmentClick, onSubtaskC
           <span className="text-[10px] font-medium">{subtaskCompleted}/{subtaskCount}</span>
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); onHoursClick?.(task); }}
-          className={`flex items-center gap-1 px-1.5 py-1 rounded-md cursor-pointer transition-colors hover:bg-muted ${timeLogged > 0 ? "text-foreground" : "text-muted-foreground/50 hover:text-foreground"}`}
+          onClick={handleTimerClick}
+          className={`flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-all duration-300 ${
+            isTimerActive 
+              ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20" 
+              : timeLogged > 0 
+                ? "hover:bg-muted text-foreground" 
+                : "text-muted-foreground/50 hover:text-foreground hover:bg-muted"
+          }`}
+          title={isTimerActive ? "Stop Timer" : "Start Timer"}
         >
-          <Timer className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-medium">
-            {timeLogged > 0 ? `${timeLogged}h` : "0h"}
-            {estimatedHours > 0 ? `/${estimatedHours}h` : ""}
+          {isTimerActive ? (
+            <div className="relative flex items-center justify-center">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+              <StopCircle className="relative h-3.5 w-3.5" />
+            </div>
+          ) : (
+            <Timer className="h-3.5 w-3.5" />
+          )}
+          <span className={`text-[10px] font-medium ${isTimerActive ? "font-bold" : ""}`}>
+            {isTimerActive ? "Tracking..." : (
+              <>
+                {timeLogged > 0 ? `${Number(timeLogged).toFixed(1)}h` : "0h"}
+                {estimatedHours > 0 ? `/${estimatedHours}h` : ""}
+              </>
+            )}
           </span>
         </button>
       </div>
@@ -177,6 +209,99 @@ function KanbanCard({ task, onClick, nameMap = {}, onAttachmentClick, onSubtaskC
             <span className="text-[10px]">{task.tags.length} tags</span>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+// ── Kanban Column (with infinite scroll) ──────────────────────────
+function KanbanColumn({
+  status, statusTasks, loading, onUpdateStatus, renderCard, onAddNew
+}: {
+  status: string;
+  statusTasks: any[];
+  loading: boolean;
+  onUpdateStatus: (taskId: string, status: string) => void;
+  renderCard: (task: any) => React.ReactNode;
+  onAddNew: () => void;
+}) {
+  const [limit, setLimit] = useState(20);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const c = STATUS_COLORS[status] || STATUS_COLORS["Not Started"];
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        setLimit((prev) => Math.min(prev + 20, statusTasks.length));
+      }
+    }
+  };
+
+  const visibleTasks = statusTasks.slice(0, limit);
+
+  return (
+    <div
+      className="flex flex-col h-full bg-muted/20 rounded-xl border overflow-hidden flex-1 min-w-[200px]"
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        (e.currentTarget as HTMLElement).classList.add("ring-2", "ring-primary/40", "bg-primary/5");
+      }}
+      onDragLeave={(e) => {
+        (e.currentTarget as HTMLElement).classList.remove("ring-2", "ring-primary/40", "bg-primary/5");
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        (e.currentTarget as HTMLElement).classList.remove("ring-2", "ring-primary/40", "bg-primary/5");
+        const taskId = e.dataTransfer.getData("text/plain");
+        if (taskId) {
+            onUpdateStatus(taskId, status);
+        }
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-3 border-b bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="flex items-center gap-2">
+          <span className={`h-2.5 w-2.5 rounded-full ${c.dot}`} />
+          <span className="text-sm font-semibold whitespace-nowrap">{status}</span>
+          <Badge variant="secondary" className="text-[10px] h-5 px-1.5 rounded-full font-mono">
+            {statusTasks.length}
+          </Badge>
+        </div>
+        <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6" 
+            onClick={onAddNew}
+        >
+            <Plus className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </div>
+
+      {/* List */}
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-2 space-y-2.5 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40"
+      >
+        {loading ? (
+           Array.from({ length: 3 }).map((_, i) => (
+             <div key={i} className="p-3 rounded-lg border bg-card/50">
+               <Skeleton className="h-4 w-3/4 mb-2" />
+               <Skeleton className="h-3 w-1/2" />
+             </div>
+           ))
+        ) : (
+           visibleTasks.map(renderCard)
+        )}
+        {visibleTasks.length < statusTasks.length && (
+            <div className="py-2 flex justify-center">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
+            </div>
+        )}
       </div>
     </div>
   );
@@ -939,7 +1064,7 @@ export default function TasksPage() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-4">
+      <div className="h-full flex flex-col gap-4">
         {/* ── Filter Dialog ──────────────────────────────────────── */}
         <Dialog open={showFilters} onOpenChange={setShowFilters}>
           <DialogContent className="sm:max-w-[400px]">
@@ -1181,66 +1306,21 @@ export default function TasksPage() {
         {/* ██  BOARD VIEW (KANBAN)  ██ */}
         {/* ══════════════════════════════════════════════════════════ */}
         {view === "board" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {STATUSES.map(status => {
-              const statusTasks = groupedByStatus[status] || [];
-              const c = STATUS_COLORS[status];
-              return (
-                <div
-                  key={status}
-                  className="space-y-3"
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = "move";
-                    (e.currentTarget as HTMLElement).classList.add("ring-2", "ring-primary/40", "rounded-lg");
-                  }}
-                  onDragLeave={(e) => {
-                    (e.currentTarget as HTMLElement).classList.remove("ring-2", "ring-primary/40", "rounded-lg");
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    (e.currentTarget as HTMLElement).classList.remove("ring-2", "ring-primary/40", "rounded-lg");
-                    const taskId = e.dataTransfer.getData("text/plain");
-                    if (taskId) {
-                      const draggedTask = tasks.find(t => t.taskId === taskId);
-                      if (draggedTask && draggedTask.status !== status) {
-                        updateTaskStatus(taskId, status);
-                      }
-                    }
-                  }}
-                >
-                  {/* Column header */}
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${c.dot}`} />
-                      <span className="text-sm font-semibold">{status}</span>
-                      <Badge variant="secondary" className="text-[10px] h-5 px-1.5 rounded-full">
-                        {statusTasks.length}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Add task button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowNewTask(true)}
-                    className="w-full border-dashed gap-1.5 text-xs h-8"
-                  >
-                    <Plus className="h-3.5 w-3.5" /> Add Task
-                  </Button>
-
-                  {/* Cards */}
-                  <div className="space-y-2 min-h-[200px]">
-                    {loading ? (
-                      Array.from({ length: 2 }).map((_, i) => (
-                        <div key={i} className="p-3 rounded-lg border">
-                          <Skeleton className="h-4 w-3/4 mb-2" />
-                          <Skeleton className="h-3 w-1/2" />
-                        </div>
-                      ))
-                    ) : (
-                      statusTasks.map(task => (
+          <div className="flex-1 min-h-0 flex gap-4 overflow-x-auto pb-4 px-1">
+            {STATUSES.map(status => (
+                <KanbanColumn
+                    key={status}
+                    status={status}
+                    statusTasks={groupedByStatus[status] || []}
+                    loading={loading}
+                    onUpdateStatus={(taskId: string, newStatus: string) => {
+                        const draggedTask = tasks.find((t: any) => t.taskId === taskId);
+                        if (draggedTask && draggedTask.status !== newStatus) {
+                            updateTaskStatus(taskId, newStatus);
+                        }
+                    }}
+                    onAddNew={() => setShowNewTask(true)}
+                    renderCard={(task: any) => (
                         <KanbanCard
                           key={task.taskId}
                           task={task}
@@ -1248,14 +1328,10 @@ export default function TasksPage() {
                           nameMap={nameMap}
                           onAttachmentClick={(t) => { setMetaDialogTask(t); setMetaDialogType("attachments"); }}
                           onSubtaskClick={(t) => { setMetaDialogTask(t); setMetaDialogType("subtasks"); }}
-                          onHoursClick={(t) => { setMetaDialogTask(t); setMetaDialogType("hours"); }}
                         />
-                      ))
                     )}
-                  </div>
-                </div>
-              );
-            })}
+                />
+            ))}
           </div>
         )}
 

@@ -21,7 +21,8 @@ import {
   IconCalendarWeek,
   IconLayoutDashboard,
 } from "@tabler/icons-react";
-import { ChevronsUpDown, Check, Layers } from "lucide-react";
+import { ChevronsUpDown, Check, Layers, StopCircle } from "lucide-react";
+import { useTimer } from "@/components/providers/timer-provider";
 
 import { NavDocuments } from "@/components/nav-documents";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -175,6 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [workspaces, setWorkspaces] = React.useState<any[]>([]);
   const [activeWorkspace, setActiveWorkspace] = React.useState<any>(null);
   const router = useRouter();
+  const { activeTimer, elapsed, stopTimer } = useTimer();
 
   // ── Fetch workspaces ──────────────────────────────────────────────
   React.useEffect(() => {
@@ -546,6 +548,52 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {filteredSecondary.length > 0 && <NavSecondary items={filteredSecondary as any} className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>
+        {activeTimer && (
+          <>
+            <div className="mx-2 mb-2 p-2.5 rounded-xl bg-red-500/5 border border-red-500/10 flex items-center justify-between group-data-[collapsible=icon]:hidden animate-in slide-in-from-bottom-2 fade-in duration-300">
+               <div className="flex flex-col min-w-0 mr-3">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                     <span className="relative flex h-2 w-2">
+                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                       <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                     </span>
+                     <span className="text-[9px] font-black text-red-600 uppercase tracking-widest">LIVE TRACKING</span>
+                  </div>
+                  <span 
+                    className="text-xs font-semibold text-foreground truncate cursor-pointer hover:underline decoration-red-500/30"
+                    onClick={() => router.push(`/dashboard?task=${activeTimer.taskId}`)} // Or tasks page
+                    title={activeTimer.taskName}
+                  >
+                    {activeTimer.taskName || "Untitled Task"}
+                  </span>
+                  <span className="text-lg font-mono font-bold text-red-600 leading-none mt-1">{elapsed}</span>
+               </div>
+               <button 
+                 onClick={() => stopTimer()} 
+                 className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-red-500 text-white hover:bg-red-600 shadow-sm shadow-red-500/20 transition-all hover:scale-105 active:scale-95"
+                 title="Stop Timer"
+               >
+                  <StopCircle className="h-4 w-4 fill-current" />
+               </button>
+            </div>
+            
+            {/* Collapsed View */}
+            <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center justify-center mb-3 animate-in fade-in zoom-in duration-300">
+                <button 
+                  onClick={() => stopTimer()} 
+                  className="relative h-9 w-9 flex items-center justify-center rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white transition-all group"
+                  title={`Stop: ${activeTimer.taskName}`}
+                >
+                   <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border-2 border-background"></span>
+                   </span>
+                   <StopCircle className="h-4.5 w-4.5 group-hover:fill-current" />
+                </button>
+                <span className="text-[9px] font-mono font-bold text-red-600 mt-1">{elapsed}</span>
+            </div>
+          </>
+        )}
         <NavUser user={data.user} />
       </SidebarFooter>
 

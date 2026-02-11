@@ -15,6 +15,11 @@ export interface IUser extends Document {
   serialNo?: string;
   signature?: string;
   location?: string;
+  activeTaskTimer?: {
+    taskId: string;
+    startTime: Date;
+    taskName?: string;
+  };
 }
 
 const UserSchema: Schema = new Schema({
@@ -37,6 +42,11 @@ const UserSchema: Schema = new Schema({
   profilePicture: { type: String },
   isActive: { type: Boolean, default: true, index: true },
   location: { type: String },
+  activeTaskTimer: {
+    taskId: { type: String },
+    startTime: { type: Date },
+    taskName: { type: String },
+  },
 }, { collection: 'SYMXUsers' });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
