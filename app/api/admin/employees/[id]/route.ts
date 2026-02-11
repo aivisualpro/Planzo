@@ -68,7 +68,7 @@ export async function PUT(
     // ── Audit ──
     logAudit({
       eventType: "member_added",
-      description: `Employee "${updatedEmployee.fullName || updatedEmployee.firstName}" profile was updated`,
+      description: `Employee "${updatedEmployee.fullName}" profile was updated`,
       performedBy: session?.email || session?.id || "system",
       performedByName: session?.name,
       field: Object.keys(body).join(", "),
@@ -105,7 +105,7 @@ export async function DELETE(
     // ── Audit ──
     logAudit({
       eventType: "member_removed",
-      description: `Employee "${deletedEmployee.fullName || deletedEmployee.firstName}" was removed`,
+      description: `Employee "${deletedEmployee.fullName}" was removed`,
       performedBy: session?.email || session?.id || "system",
       performedByName: session?.name,
       oldValue: deletedEmployee.email,
