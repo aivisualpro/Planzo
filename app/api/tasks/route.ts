@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
 import Task from "@/lib/models/Task";
 import SubTask from "@/lib/models/SubTask";
+import { logAudit, diffFields } from "@/lib/audit";
 
 // GET: Fetch tasks with filters
 export async function GET(req: NextRequest) {
@@ -99,6 +100,19 @@ export async function POST(req: NextRequest) {
     });
 
     await task.save();
+
+    // ── Audit: task_created ──
+    logAudit({
+      eventType: "task_created",
+      description: `Task "${task.taskName || taskId}" was created`,
+      performedBy: session.email || session.id,
+      performedByName: session.name,
+      workspaceId: body.workspaceId,
+      projectId: body.projectId,
+      taskId,
+      taskName: task.taskName,
+    });
+
     return NextResponse.json({ success: true, task });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -117,13 +131,56 @@ export async function PATCH(req: NextRequest) {
 
     if (!taskId) return NextResponse.json({ error: "taskId required" }, { status: 400 });
 
+    // Fetch old task for diff
+    const oldTask = await Task.findOne({ taskId }).lean() as Record<string, any> | null;
+
     const task = await Task.findOneAndUpdate(
       { taskId },
       { $set: updates },
       { new: true }
-    ).lean();
+    ).lean() as Record<string, any> | null;
 
     if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+
+    // ── Audit: task_updated with field diffs ──
+    if (oldTask) {
+      const trackedFields = ["status", "assignee", "priority", "dueDate", "taskName", "taskDescription", "estimatedHours", "isBlocked", "approvalStatus", "tags"];
+      const changes = diffFields(oldTask, updates, trackedFields.filter(f => f in updates));
+
+      for (const change of changes) {
+        const eventType = change.field === "status" ? "status_changed"
+          : change.field === "assignee" ? "assignment_changed"
+          : "task_updated";
+
+        logAudit({
+          eventType,
+          description: `Task "${task.taskName || taskId}": ${change.field} changed from "${change.oldValue}" to "${change.newValue}"`,
+          performedBy: session.email || session.id,
+          performedByName: session.name,
+          workspaceId: task.workspaceId,
+          projectId: task.projectId,
+          taskId,
+          taskName: task.taskName,
+          field: change.field,
+          oldValue: change.oldValue,
+          newValue: change.newValue,
+        });
+      }
+
+      // If no tracked fields changed but an update was made, still log it
+      if (changes.length === 0) {
+        logAudit({
+          eventType: "task_updated",
+          description: `Task "${task.taskName || taskId}" was updated`,
+          performedBy: session.email || session.id,
+          performedByName: session.name,
+          workspaceId: task.workspaceId,
+          projectId: task.projectId,
+          taskId,
+          taskName: task.taskName,
+        });
+      }
+    }
 
     return NextResponse.json({ success: true, task });
   } catch (error: any) {

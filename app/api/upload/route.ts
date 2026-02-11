@@ -10,27 +10,28 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// POST: General-purpose file upload to Cloudinary
 export async function POST(req: NextRequest) {
-  // 1. Verify credentials present
   if (
     !process.env.CLOUDINARY_CLOUD_NAME ||
     !process.env.CLOUDINARY_API_KEY ||
     !process.env.CLOUDINARY_API_SECRET
   ) {
-    console.error("Missing Cloudinary credentials");
     return NextResponse.json(
-      { error: "Server configuration error: Missing Cloudinary credentials" },
+      { error: "Missing Cloudinary credentials" },
       { status: 500 }
     );
   }
 
   try {
     const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    // 2. Parse Form Data
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    const folder = (formData.get("folder") as string) || "planzo/uploads";
+    const folder = (formData.get("folder") as string) || "planzo/attachments";
     const taskId = formData.get("taskId") as string | null;
     const projectId = formData.get("projectId") as string | null;
 
@@ -38,48 +39,47 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // 3. Convert file to buffer for stream
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 4. Upload to Cloudinary
     const result: any = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
           folder,
           resource_type: "auto",
+          public_id: `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`,
         },
         (error, result) => {
-          if (error) {
-            console.error("Cloudinary Stream Error:", error);
-            reject(error);
-          } else {
-            resolve(result);
-          }
+          if (error) reject(error);
+          else resolve(result);
         }
       ).end(buffer);
     });
 
-    // 5. Audit trail
-    if (session) {
-      logAudit({
-        eventType: "attachment_added",
-        description: `File "${file.name}" uploaded to ${folder}`,
-        performedBy: session.email || session.id,
-        performedByName: session.name,
-        taskId: taskId || undefined,
-        projectId: projectId || undefined,
-        newValue: result?.secure_url || result?.url,
-      });
-    }
+    // Audit trail
+    logAudit({
+      eventType: "attachment_added",
+      description: `File "${file.name}" uploaded`,
+      performedBy: session.email || session.id,
+      performedByName: session.name,
+      taskId: taskId || undefined,
+      projectId: projectId || undefined,
+      newValue: result?.secure_url || result?.url,
+    });
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      success: true,
+      url: result.secure_url,
+      publicId: result.public_id,
+      format: result.format,
+      bytes: result.bytes,
+      originalFilename: file.name,
+    });
   } catch (error: any) {
-    console.error("Upload Route Error:", error);
+    console.error("Upload Error:", error);
     return NextResponse.json(
-      { error: error.message || "Upload failed due to server error" },
+      { error: error.message || "Upload failed" },
       { status: 500 }
     );
   }
 }
-

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import Employee from "@/lib/models/Employee";
+import { logAudit } from "@/lib/audit";
 
 type RouteProps = {
   params: Promise<{ id: string }>;
@@ -52,7 +53,6 @@ export async function PUT(
     const params = await props.params;
     const body = await req.json();
 
-    // Remove _id from body if present to avoid immutable field error (though mongoose handles it usually)
     delete body._id;
 
     const updatedEmployee = await Employee.findByIdAndUpdate(
@@ -64,6 +64,15 @@ export async function PUT(
     if (!updatedEmployee) {
       return new NextResponse("Employee not found", { status: 404 });
     }
+
+    // ── Audit ──
+    logAudit({
+      eventType: "member_added",
+      description: `Employee "${updatedEmployee.fullName || updatedEmployee.firstName}" profile was updated`,
+      performedBy: session?.email || session?.id || "system",
+      performedByName: session?.name,
+      field: Object.keys(body).join(", "),
+    });
 
     return NextResponse.json(updatedEmployee);
   } catch (error) {
@@ -81,7 +90,6 @@ export async function DELETE(
     await connectToDatabase();
     const session = await getSession();
     const role = session?.role;
-    // Only Admin can delete? Assuming all authenticated users with role can delete for now, or check role === 'Admin'
     if (!role) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -94,9 +102,19 @@ export async function DELETE(
       return new NextResponse("Employee not found", { status: 404 });
     }
 
+    // ── Audit ──
+    logAudit({
+      eventType: "member_removed",
+      description: `Employee "${deletedEmployee.fullName || deletedEmployee.firstName}" was removed`,
+      performedBy: session?.email || session?.id || "system",
+      performedByName: session?.name,
+      oldValue: deletedEmployee.email,
+    });
+
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error("DELETE /api/admin/employees/[id] error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
