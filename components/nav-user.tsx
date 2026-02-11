@@ -44,8 +44,9 @@ export function NavUser({
   const [isLoaded, setIsLoaded] = useState(false)
   const [user, setUser] = useState({
     ...initialUser,
-    id: "679e2a44ea73db1789c62981", // Fallback ID
-    role: "Administrator"         // Fallback Role
+    id: "",
+    employeeId: "",
+    role: "Administrator"
   })
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export function NavUser({
           const { user: sessionUser } = await res.json();
           setUser({
             id: sessionUser.id,
+            employeeId: sessionUser.employeeId || sessionUser.id,
             name: sessionUser.name,
             email: sessionUser.email,
             role: sessionUser.role,
@@ -134,7 +136,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push(`/admin/users/${user.id}`)}>
+              <DropdownMenuItem onClick={() => router.push(`/admin/employees/${user.employeeId}`)}>
                 <IconUserCircle />
                 Profile
               </DropdownMenuItem>

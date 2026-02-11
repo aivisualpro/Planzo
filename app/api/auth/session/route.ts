@@ -22,5 +22,5 @@ export async function GET() {
     return NextResponse.json({ authenticated: false, error: "Account not found" }, { status: 401 });
   }
 
-  return NextResponse.json({ authenticated: true, user: session });
+  return NextResponse.json({ authenticated: true, user: { ...session, employeeId: employee._id.toString() } });
 }

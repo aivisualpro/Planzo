@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     // ── Audit ──
     logAudit({
       eventType: "member_added",
-      description: `Employee "${employee.fullName || employee.firstName}" was added`,
+      description: `Employee "${employee.fullName}" was added`,
       performedBy: session?.email || session?.id || "system",
       performedByName: session?.name,
       newValue: employee.email,
