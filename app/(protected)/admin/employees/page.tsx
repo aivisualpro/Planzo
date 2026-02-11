@@ -23,6 +23,7 @@ import { IEmployee } from "@/lib/models/Employee";
 
 export default function EmployeesPage() {
   
+  const [data, setData] = useState<IEmployee[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -156,7 +157,7 @@ export default function EmployeesPage() {
     { accessorKey: "state", header: "State" },
     { accessorKey: "zipCode", header: "Zip" },
     { accessorKey: "gender", header: "Gender" },
-    { accessorKey: "hiredDate", header: "Hired Date", cell: ({row}) => row.original.hiredDate ? new Date(row.original.hiredDate).toLocaleDateString() : "" },
+    { accessorKey: "hiredDate", header: "Hired Date", cell: ({row}) => (row.original as any).hiredDate ? new Date((row.original as any).hiredDate).toLocaleDateString() : "" },
     { accessorKey: "dob", header: "DOB", cell: ({row}) => row.original.dob ? new Date(row.original.dob).toLocaleDateString() : "" },
     { accessorKey: "hourlyStatus", header: "Hourly Status" },
     { accessorKey: "rate", header: "Rate" },
@@ -304,9 +305,8 @@ export default function EmployeesPage() {
             <DialogTitle>{editingItem ? "Edit Employee" : "Add Employee"}</DialogTitle>
           </DialogHeader>
           <EmployeeForm 
-            initialData={editingItem ? { ...editingItem, _id: String(editingItem._id) } : {}} 
-            onSubmit={handleSubmit} 
-            isLoading={isSubmitting} 
+            employee={editingItem ? { ...editingItem, _id: String(editingItem._id) } : undefined} 
+            onSave={handleSubmit} 
             onCancel={() => setIsDialogOpen(false)}
           />
         </DialogContent>
